@@ -11,8 +11,7 @@ export const usePaymentStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
   const { global } = window.i18n
 
-  return defineStoreFunc({
-    id: 'payment',
+  return defineStoreFunc('payment', {
 
     state: () => ({
       payments: [],

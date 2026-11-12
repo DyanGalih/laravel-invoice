@@ -1,1 +1,0 @@
-import{t as e}from"./rolldown-runtime-BCiCTKAo.js";var t=e(((e,t)=>{t.exports=new Proxy({},{get:(e,t)=>{if(t==="__esModule")return{};throw Error(`You\'re trying to import \`@heroicons/vue/outline/${t}\` from Heroicons v1 but have installed Heroicons v2. Install \`@heroicons/vue@v1\` to resolve this error.`)}})}));export{t};

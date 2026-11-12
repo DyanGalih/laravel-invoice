@@ -206,7 +206,12 @@ import {
   Menu,
   MenuButton,
 } from '@headlessui/vue'
-import { MenuIcon, XIcon, LogoutIcon, CogIcon } from '@heroicons/vue/outline'
+import {
+  Bars3Icon as MenuIcon,
+  XMarkIcon as XIcon,
+  ArrowLeftOnRectangleIcon as LogoutIcon,
+  Cog6ToothIcon as CogIcon,
+} from '@heroicons/vue/24/outline'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()

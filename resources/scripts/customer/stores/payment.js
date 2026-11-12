@@ -2,8 +2,7 @@ import { handleError } from '@/scripts/customer/helpers/error-handling'
 const { defineStore } = window.pinia
 import axios from 'axios'
 
-export const usePaymentStore = defineStore({
-  id: 'customerPaymentStore',
+export const usePaymentStore = defineStore('customerPaymentStore', {
   state: () => ({
     payments: [],
     selectedViewPayment: [],

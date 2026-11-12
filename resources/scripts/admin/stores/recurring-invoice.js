@@ -18,8 +18,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
   const { global } = window.i18n
 
-  return defineStoreFunc({
-    id: 'recurring-invoice',
+  return defineStoreFunc('recurring-invoice', {
 
     state: () => ({
       templates: [],

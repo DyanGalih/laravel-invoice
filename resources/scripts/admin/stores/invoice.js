@@ -20,8 +20,7 @@ export const useInvoiceStore = (useWindow = false) => {
   const { global } = window.i18n
   const notificationStore = useNotificationStore()
 
-  return defineStoreFunc({
-    id: 'invoice',
+  return defineStoreFunc('invoice', {
     state: () => ({
       templates: [],
       invoices: [],

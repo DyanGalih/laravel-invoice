@@ -275,11 +275,11 @@ import { onUnmounted, watch } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import {
-  DotsVerticalIcon,
-  MenuAlt2Icon,
-  MenuAlt3Icon,
-  MenuIcon,
-} from '@heroicons/vue/outline'
+  EllipsisVerticalIcon as DotsVerticalIcon,
+  Bars3BottomLeftIcon as MenuAlt2Icon,
+  Bars3BottomRightIcon as MenuAlt3Icon,
+  Bars3Icon as MenuIcon,
+} from '@heroicons/vue/24/outline'
 import TextAlign from '@tiptap/extension-text-align'
 
 import {

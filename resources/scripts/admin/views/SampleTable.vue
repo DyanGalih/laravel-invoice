@@ -85,8 +85,8 @@ import {
   UserIcon,
   DocumentIcon,
   DocumentTextIcon,
-  DotsHorizontalIcon,
-} from '@heroicons/vue/solid'
+  EllipsisHorizontalIcon as DotsHorizontalIcon,
+} from '@heroicons/vue/24/solid'
 
 export default {
   components: {
