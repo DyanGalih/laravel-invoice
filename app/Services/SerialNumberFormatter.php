@@ -4,6 +4,7 @@ namespace Crater\Services;
 
 use Crater\Models\CompanySetting;
 use Crater\Models\Customer;
+use Illuminate\Support\Str;
 
 /**
  * SerialNumberFormatter
@@ -210,7 +211,7 @@ class SerialNumberFormatter
                     break;
                 case "RANDOM_SEQUENCE":
                     $value = $value ? $value : 6;
-                    $serialNumber .= substr(bin2hex(random_bytes($value)), 0, $value);
+                    $serialNumber .= Str::random($value);
 
                     break;
                 case "CUSTOMER_SERIES":
