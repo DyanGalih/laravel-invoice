@@ -8,14 +8,10 @@ return [
      * Both IPv4 and IPv6 addresses are
      * supported, along with CIDR notation.
      *
-     * The "*" character is syntactic sugar
-     * within TrustedProxy to trust any proxy
-     * that connects directly to your server,
-     * a requirement when you cannot know the address
-     * of your proxy (e.g. if using ELB or similar).
+     * Leave this unset unless the deployment explicitly identifies its proxy IPs or CIDRs.
      *
      */
-    // 'proxies' => null, // [<ip addresses>,], '*', '<ip addresses>,'
+    // 'proxies' => null, // [<ip addresses>,] or '<ip addresses>,'
 
     /*
      * To trust one or more specific proxies that connect
@@ -25,10 +21,9 @@ return [
     // 'proxies' => '192.168.1.1, 192.168.1.2',
 
     /*
-     * Or, to trust all proxies that connect
-     * directly to your server, use a "*"
+     * Do not use a wildcard here. It trusts the peer that connects directly to the application.
      */
-    'proxies' => env('TRUSTED_PROXIES', '*'),
+    'proxies' => env('TRUSTED_PROXIES'),
 
     /*
      * Which headers to use to detect proxy related data (For, Host, Proto, Port)
@@ -45,6 +40,11 @@ return [
      *
      * @link https://symfony.com/doc/current/deployment/proxies.html
      */
-    'headers' => Illuminate\Http\Request::HEADER_X_FORWARDED_ALL,
+    'headers' => Illuminate\Http\Request::HEADER_X_FORWARDED_FOR
+        | Illuminate\Http\Request::HEADER_X_FORWARDED_HOST
+        | Illuminate\Http\Request::HEADER_X_FORWARDED_PORT
+        | Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
+        | Illuminate\Http\Request::HEADER_X_FORWARDED_PREFIX
+        | Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB,
 
 ];

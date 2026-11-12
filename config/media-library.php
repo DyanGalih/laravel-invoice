@@ -8,6 +8,8 @@ return [
      */
     'disk_name' => env('MEDIA_DISK', 'public'),
 
+    'conversions_disk_name' => env('MEDIA_CONVERSIONS_DISK', null),
+
     /*
      * The maximum file size of an item in bytes.
      * Adding a larger file will result in an exception.
@@ -78,7 +80,7 @@ return [
      * This is the class that is responsible for naming conversion files. By default,
      * it will use the filename of the original and concatenate the conversion name to it.
      */
-    'conversion_file_namer' => \Spatie\MediaLibrary\Conversions\DefaultConversionFileNamer::class,
+    'file_namer' => \Spatie\MediaLibrary\Support\FileNamer\DefaultFileNamer::class,
 
     /*
      * The class that contains the strategy for determining a media file's path.

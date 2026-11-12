@@ -15,6 +15,8 @@ class EstimatePdfController extends Controller
 {
     public function getPdf(EmailLog $emailLog, Request $request)
     {
+        abort_unless($emailLog->hasMailableType(Estimate::class), 403, 'Invalid document link.');
+
         $estimate = Estimate::find($emailLog->mailable_id);
 
         if (! $emailLog->isExpired()) {
@@ -46,6 +48,8 @@ class EstimatePdfController extends Controller
 
     public function getEstimate(EmailLog $emailLog)
     {
+        abort_unless($emailLog->hasMailableType(Estimate::class), 403, 'Invalid document link.');
+
         $estimate = Estimate::find($emailLog->mailable_id);
 
         return new EstimateResource($estimate);
