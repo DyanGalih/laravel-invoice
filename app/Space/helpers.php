@@ -6,6 +6,11 @@ use Crater\Models\CustomField;
 use Crater\Models\Setting;
 use Illuminate\Support\Str;
 
+function vite_asset($path)
+{
+    return asset('build/'.ltrim($path, '/'));
+}
+
 /**
  * Get company setting
  *

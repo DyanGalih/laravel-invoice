@@ -15,6 +15,8 @@ class InvoicePdfController extends Controller
 {
     public function getPdf(EmailLog $emailLog, Request $request)
     {
+        abort_unless($emailLog->hasMailableType(Invoice::class), 403, 'Invalid document link.');
+
         $invoice = Invoice::find($emailLog->mailable_id);
 
         if (! $emailLog->isExpired()) {
@@ -54,6 +56,8 @@ class InvoicePdfController extends Controller
 
     public function getInvoice(EmailLog $emailLog)
     {
+        abort_unless($emailLog->hasMailableType(Invoice::class), 403, 'Invalid document link.');
+
         $invoice = Invoice::find($emailLog->mailable_id);
 
         return new CustomerInvoiceResource($invoice);
