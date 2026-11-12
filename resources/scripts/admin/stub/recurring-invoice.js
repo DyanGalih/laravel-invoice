@@ -1,4 +1,3 @@
-import Guid from 'guid'
 import recurringInvoiceItemStub from './recurring-invoice-item'
 import taxStub from './tax'
 
@@ -33,8 +32,8 @@ export default function () {
     items: [
       {
         ...recurringInvoiceItemStub,
-        id: Guid.raw(),
-        taxes: [{ ...taxStub, id: Guid.raw() }],
+        id: crypto.randomUUID(),
+        taxes: [{ ...taxStub, id: crypto.randomUUID() }],
       },
     ],
     taxes: [],

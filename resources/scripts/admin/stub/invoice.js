@@ -1,4 +1,3 @@
-import Guid from 'guid'
 import invoiceItemStub from './invoice-item'
 import taxStub from './tax'
 
@@ -27,8 +26,8 @@ export default function () {
     items: [
       {
         ...invoiceItemStub,
-        id: Guid.raw(),
-        taxes: [{ ...taxStub, id: Guid.raw() }],
+        id: crypto.randomUUID(),
+        taxes: [{ ...taxStub, id: crypto.randomUUID() }],
       },
     ],
     customFields: [],

@@ -8,7 +8,6 @@ import { useCompanyStore } from './company'
 import { useItemStore } from './item'
 import { useTaxTypeStore } from './tax-type'
 import { useCustomerStore } from './customer'
-import Guid from 'guid'
 import { handleError } from '@/scripts/helpers/error-handling'
 import moment from 'moment'
 import _ from 'lodash'
@@ -43,9 +42,15 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
         { label: 'Every day at midnight ', value: '0 0 * * *' },
         { label: 'Every Week', value: '0 0 * * 0' },
         { label: 'Every 15 days at midnight', value: '0 5 */15 * *' },
-        { label: 'On the first day of every month at 00:00', value: '0 0 1 * *' },
+        {
+          label: 'On the first day of every month at 00:00',
+          value: '0 0 1 * *',
+        },
         { label: 'Every 6 Month', value: '0 0 1 */6 *' },
-        { label: 'Every year on the first day of january at 00:00', value: '0 0 1 1 *' },
+        {
+          label: 'Every year on the first day of january at 00:00',
+          value: '0 0 1 1 *',
+        },
         { label: 'Custom', value: 'CUSTOM' },
       ],
     }),
@@ -108,8 +113,8 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       deselectItem(index) {
         this.newRecurringInvoice.items[index] = {
           ...recurringInvoiceItemStub,
-          id: Guid.raw(),
-          taxes: [{ ...TaxStub, id: Guid.raw() }],
+          id: crypto.randomUUID(),
+          taxes: [{ ...TaxStub, id: crypto.randomUUID() }],
         }
       },
 
@@ -173,7 +178,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
               })
 
               let pos = this.recurringInvoices.findIndex(
-                (invoice) => invoice.id === response.data.data.id
+                (invoice) => invoice.id === response.data.data.id,
               )
 
               this.recurringInvoices[pos] = response.data.data
@@ -239,7 +244,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
             .post(`/api/v1/recurring-invoices/delete`, id)
             .then((response) => {
               let index = this.recurringInvoices.findIndex(
-                (invoice) => invoice.id === id
+                (invoice) => invoice.id === id,
               )
               this.recurringInvoices.splice(index, 1)
               resolve(response)
@@ -264,7 +269,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
             .then((response) => {
               this.selectedRecurringInvoices.forEach((invoice) => {
                 let index = this.recurringInvoices.findIndex(
-                  (_inv) => _inv.id === invoice.id
+                  (_inv) => _inv.id === invoice.id,
                 )
                 this.recurringInvoices.splice(index, 1)
               })
@@ -304,7 +309,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
           this.selectAllField = false
         } else {
           let allInvoiceIds = this.recurringInvoices.map(
-            (invoice) => invoice.id
+            (invoice) => invoice.id,
           )
           this.selectedRecurringInvoices = allInvoiceIds
           this.selectAllField = true
@@ -314,8 +319,8 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       addItem() {
         this.newRecurringInvoice.items.push({
           ...recurringInvoiceItemStub,
-          id: Guid.raw(),
-          taxes: [{ ...TaxStub, id: Guid.raw() }],
+          id: crypto.randomUUID(),
+          taxes: [{ ...TaxStub, id: crypto.randomUUID() }],
         })
       },
 
@@ -352,8 +357,10 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
             companyStore.selectedCompanySettings.tax_per_item
           this.newRecurringInvoice.discount_per_item =
             companyStore.selectedCompanySettings.discount_per_item
-          this.newRecurringInvoice.sales_tax_type = companyStore.selectedCompanySettings.sales_tax_type
-          this.newRecurringInvoice.sales_tax_address_type = companyStore.selectedCompanySettings.sales_tax_address_type
+          this.newRecurringInvoice.sales_tax_type =
+            companyStore.selectedCompanySettings.sales_tax_type
+          this.newRecurringInvoice.sales_tax_address_type =
+            companyStore.selectedCompanySettings.sales_tax_address_type
           this.newRecurringInvoice.starts_at = moment().format('YYYY-MM-DD')
           this.newRecurringInvoice.next_invoice_date = moment()
             .add(7, 'days')
@@ -395,7 +402,7 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
             this.isFetchingInitialSettings = false
           })
           .catch((err) => {
-            console.log(err);
+            console.log(err)
             handleError(err)
           })
       },
@@ -403,7 +410,9 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       addSalesTaxUs() {
         const taxTypeStore = useTaxTypeStore()
         let salesTax = { ...TaxStub }
-        let found = this.newRecurringInvoice.taxes.find((_t) => _t.name === 'Sales Tax' && _t.type === 'MODULE')
+        let found = this.newRecurringInvoice.taxes.find(
+          (_t) => _t.name === 'Sales Tax' && _t.type === 'MODULE',
+        )
         if (found) {
           for (const key in found) {
             if (Object.prototype.hasOwnProperty.call(salesTax, key)) {
@@ -420,14 +429,15 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       },
 
       setSelectedFrequency() {
-        let data = this.frequencies.find(
-          (frequency) => {
-            return frequency.value === this.newRecurringInvoice.frequency
-          }
-        )
-        data ? this.newRecurringInvoice.selectedFrequency = data
-          : this.newRecurringInvoice.selectedFrequency = { label: 'Custom', value: 'CUSTOM' }
-
+        let data = this.frequencies.find((frequency) => {
+          return frequency.value === this.newRecurringInvoice.frequency
+        })
+        data
+          ? (this.newRecurringInvoice.selectedFrequency = data)
+          : (this.newRecurringInvoice.selectedFrequency = {
+              label: 'Custom',
+              value: 'CUSTOM',
+            })
       },
 
       resetSelectedNote() {

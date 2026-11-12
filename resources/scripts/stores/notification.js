@@ -16,7 +16,7 @@ export const useNotificationStore = (useWindow = false) => {
       showNotification(notification) {
         this.notifications.push({
           ...notification,
-          id: (Math.random().toString(36) + Date.now().toString(36)).substr(2),
+          id: crypto.randomUUID(),
         })
       },
 
@@ -24,7 +24,7 @@ export const useNotificationStore = (useWindow = false) => {
         this.notifications = this.notifications.filter((notification) => {
           return notification.id != data.id
         })
-      }
-    }
+      },
+    },
   })()
 }

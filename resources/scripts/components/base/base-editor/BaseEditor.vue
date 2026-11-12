@@ -8,132 +8,56 @@
   </BaseContentPlaceholders>
   <div
     v-else
-    class="
-      box-border
-      w-full
-      text-sm
-      leading-8
-      text-left
-      bg-white
-      border border-gray-200
-      rounded-md
-      min-h-[200px]
-      overflow-hidden
-    "
+    class="box-border w-full text-sm leading-8 text-left bg-white border border-gray-200 rounded-md min-h-[200px] overflow-hidden"
   >
     <div v-if="editor" class="editor-content">
       <div class="flex justify-end p-2 border-b border-gray-200 md:hidden">
         <BaseDropdown width-class="w-48">
           <template #activator>
             <div
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                ml-2
-                text-sm text-black
-                bg-white
-                rounded-sm
-                md:h-9 md:w-9
-              "
+              class="flex items-center justify-center w-6 h-6 ml-2 text-sm text-black bg-white rounded-sm md:h-9 md:w-9"
             >
               <dots-vertical-icon class="w-6 h-6 text-gray-600" />
             </div>
           </template>
           <div class="flex flex-wrap space-x-1">
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('bold') }"
               @click="editor.chain().focus().toggleBold().run()"
             >
               <bold-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('italic') }"
               @click="editor.chain().focus().toggleItalic().run()"
             >
               <italic-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('strike') }"
               @click="editor.chain().focus().toggleStrike().run()"
             >
               <strikethrough-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('code') }"
               @click="editor.chain().focus().toggleCode().run()"
             >
               <coding-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('paragraph') }"
               @click="editor.chain().focus().setParagraph().run()"
             >
               <paragraph-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{
                 'bg-gray-200': editor.isActive('heading', { level: 1 }),
               }"
@@ -142,16 +66,7 @@
               H1
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{
                 'bg-gray-200': editor.isActive('heading', { level: 2 }),
               }"
@@ -160,16 +75,7 @@
               H2
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{
                 'bg-gray-200': editor.isActive('heading', { level: 3 }),
               }"
@@ -179,96 +85,42 @@
             </span>
 
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('bulletList') }"
               @click="editor.chain().focus().toggleBulletList().run()"
             >
               <list-ul-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('orderedList') }"
               @click="editor.chain().focus().toggleOrderedList().run()"
             >
               <list-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('blockquote') }"
               @click="editor.chain().focus().toggleBlockquote().run()"
             >
               <quote-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('codeBlock') }"
               @click="editor.chain().focus().toggleCodeBlock().run()"
             >
               <code-block-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('undo') }"
               @click="editor.chain().focus().undo().run()"
             >
               <undo-icon class="h-3 cursor-pointer fill-current" />
             </span>
             <span
-              class="
-                flex
-                items-center
-                justify-center
-                w-6
-                h-6
-                rounded-sm
-                cursor-pointer
-                hover:bg-gray-100
-              "
+              class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
               :class="{ 'bg-gray-200': editor.isActive('redo') }"
               @click="editor.chain().focus().redo().run()"
             >
@@ -280,128 +132,56 @@
       <div class="hidden p-2 border-b border-gray-200 md:flex">
         <div class="flex flex-wrap space-x-1">
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('bold') }"
             @click="editor.chain().focus().toggleBold().run()"
           >
             <bold-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('italic') }"
             @click="editor.chain().focus().toggleItalic().run()"
           >
             <italic-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('strike') }"
             @click="editor.chain().focus().toggleStrike().run()"
           >
             <strikethrough-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('code') }"
             @click="editor.chain().focus().toggleCode().run()"
           >
             <coding-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('paragraph') }"
             @click="editor.chain().focus().setParagraph().run()"
           >
             <paragraph-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('heading', { level: 1 }) }"
             @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
           >
             H1
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('heading', { level: 2 }) }"
             @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
           >
             H2
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('heading', { level: 3 }) }"
             @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
           >
@@ -409,144 +189,63 @@
           </span>
 
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('bulletList') }"
             @click="editor.chain().focus().toggleBulletList().run()"
           >
             <list-ul-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('orderedList') }"
             @click="editor.chain().focus().toggleOrderedList().run()"
           >
             <list-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('blockquote') }"
             @click="editor.chain().focus().toggleBlockquote().run()"
           >
             <quote-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('codeBlock') }"
             @click="editor.chain().focus().toggleCodeBlock().run()"
           >
             <code-block-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('undo') }"
             @click="editor.chain().focus().undo().run()"
           >
             <undo-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive('redo') }"
             @click="editor.chain().focus().redo().run()"
           >
             <redo-icon class="h-3 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive({ textAlign: 'left' }) }"
             @click="editor.chain().focus().setTextAlign('left').run()"
           >
             <menu-alt2-icon class="h-5 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive({ textAlign: 'right' }) }"
             @click="editor.chain().focus().setTextAlign('right').run()"
           >
             <menu-alt3-icon class="h-5 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{
               'bg-gray-200': editor.isActive({ textAlign: 'justify' }),
             }"
@@ -555,16 +254,7 @@
             <menu-icon class="h-5 cursor-pointer fill-current" />
           </span>
           <span
-            class="
-              flex
-              items-center
-              justify-center
-              w-6
-              h-6
-              rounded-sm
-              cursor-pointer
-              hover:bg-gray-100
-            "
+            class="flex items-center justify-center w-6 h-6 rounded-sm cursor-pointer hover:bg-gray-100"
             :class="{ 'bg-gray-200': editor.isActive({ textAlign: 'center' }) }"
             @click="editor.chain().focus().setTextAlign('center').run()"
           >
@@ -574,15 +264,7 @@
       </div>
       <editor-content
         :editor="editor"
-        class="
-          box-border
-          relative
-          w-full
-          text-sm
-          leading-8
-          text-left
-          editor__content
-        "
+        class="box-border relative w-full text-sm leading-8 text-left editor__content"
       />
     </div>
   </div>
@@ -673,7 +355,7 @@ export default {
         }
 
         editor.value.commands.setContent(props.modelValue, false)
-      }
+      },
     )
 
     onUnmounted(() => {
@@ -693,7 +375,10 @@ export default {
   min-height: 200px;
   padding: 8px 12px;
   outline: none;
-  @apply rounded-md rounded-tl-none rounded-tr-none border border-transparent;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 
   h1 {
     font-size: 2em;
@@ -750,6 +435,6 @@ export default {
 }
 
 .ProseMirror:focus {
-  @apply border border-primary-400 ring-primary-400;
+  border: 1px solid rgb(var(--color-primary-400));
 }
 </style>

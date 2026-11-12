@@ -1,4 +1,3 @@
-import Guid from 'guid'
 import estimateItemStub from './estimate-item'
 import taxStub from './tax'
 
@@ -26,8 +25,8 @@ export default function () {
     items: [
       {
         ...estimateItemStub,
-        id: Guid.raw(),
-        taxes: [{ ...taxStub, id: Guid.raw() }],
+        id: crypto.randomUUID(),
+        taxes: [{ ...taxStub, id: crypto.randomUUID() }],
       },
     ],
     taxes: [],

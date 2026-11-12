@@ -43,7 +43,7 @@ const props = defineProps({
   },
   id: {
     type: [Number, String],
-    default: () => `check_${Math.random().toString(36).substr(2, 9)}`,
+    default: () => `check_${crypto.randomUUID()}`,
   },
   disabled: {
     type: Boolean,
