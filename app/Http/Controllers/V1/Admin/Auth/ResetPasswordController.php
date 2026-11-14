@@ -60,6 +60,10 @@ class ResetPasswordController extends Controller
 
         $user->save();
 
+        if (method_exists($user, 'tokens')) {
+            $user->tokens()->delete();
+        }
+
         event(new PasswordReset($user));
     }
 
