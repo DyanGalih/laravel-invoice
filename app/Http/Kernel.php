@@ -22,7 +22,7 @@ class Kernel extends HttpKernel
         \Crater\Http\Middleware\TrustProxies::class,
         \Crater\Http\Middleware\ConfigMiddleware::class,
         \Crater\Http\Middleware\SecurityHeaders::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
+        \Crater\Http\Middleware\CorsMiddleware::class,
     ];
 
     /**
