@@ -65,7 +65,10 @@
 import { ref, reactive, watchEffect, computed } from 'vue'
 import BaseList from '@/scripts/components/list/BaseList.vue'
 import BaseListItem from '@/scripts/components/list/BaseListItem.vue'
-import { OfficeBuildingIcon, UserIcon } from '@heroicons/vue/outline'
+import {
+  BuildingOfficeIcon as OfficeBuildingIcon,
+  UserIcon,
+} from '@heroicons/vue/24/outline'
 import { useGlobalStore } from '@/scripts/customer/stores/global'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()

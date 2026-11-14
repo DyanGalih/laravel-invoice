@@ -7,8 +7,7 @@ export const useUsersStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
   const { global } = window.i18n
 
-  return defineStoreFunc({
-    id: 'users',
+  return defineStoreFunc('users', {
     state: () => ({
       roles: [],
       users: [],
@@ -152,7 +151,7 @@ export const useUsersStore = (useWindow = false) => {
               this.users.splice(index, 1)
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('users.deleted_message', 1),
+                message: global.t('users.deleted_message', 1),
               })
               resolve(response)
             })
@@ -177,7 +176,7 @@ export const useUsersStore = (useWindow = false) => {
               const notificationStore = useNotificationStore()
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('users.deleted_message', 2),
+                message: global.t('users.deleted_message', 2),
               })
               resolve(response)
             })

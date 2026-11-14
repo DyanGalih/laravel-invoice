@@ -48,7 +48,7 @@ class FilePermissionChecker
      */
     private function getPermission($folder)
     {
-        return substr(sprintf('%o', fileperms(base_path($folder))), -4);
+        return sprintf('%04o', fileperms(base_path($folder)) & 0777);
     }
 
     /**

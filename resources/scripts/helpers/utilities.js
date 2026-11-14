@@ -48,20 +48,20 @@ export default {
       const negativeSign = amount < 0 ? '-' : ''
 
       let i = parseInt(
-        (amount = Math.abs(Number(amount) || 0).toFixed(precision))
+        (amount = Math.abs(Number(amount) || 0).toFixed(precision)),
       ).toString()
       let j = i.length > 3 ? i.length % 3 : 0
 
       let moneySymbol = `${symbol}`
-      let thousandText = j ? i.substr(0, j) + thousand_separator : ''
+      let thousandText = j ? i.slice(0, j) + thousand_separator : ''
       let amountText = i
-        .substr(j)
+        .slice(j)
         .replace(/(\d{3})(?=\d)/g, '$1' + thousand_separator)
       let precisionText = precision
         ? decimal_separator +
-        Math.abs(amount - i)
-          .toFixed(precision)
-          .slice(2)
+          Math.abs(amount - i)
+            .toFixed(precision)
+            .slice(2)
         : ''
       let combinedAmountText =
         negativeSign + thousandText + amountText + precisionText
@@ -95,12 +95,12 @@ export default {
     }
     let pattern = new RegExp(
       '^(https?:\\/\\/)?' + // protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-      '(\\#[-a-z\\d_]*)?$',
-      'i'
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$',
+      'i',
     ) // fragment locator
 
     return !!pattern.test(url)
@@ -113,12 +113,12 @@ export default {
 
     let pattern = new RegExp(
       '^(https?:\\/\\/)?' + // protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-      '(\\#[-a-z\\d_]*)?$',
-      'i'
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$',
+      'i',
     ) // fragment locator
 
     return !!pattern.test(url)
@@ -154,7 +154,7 @@ export default {
       },
       function (err) {
         return false
-      }
+      },
     )
   },
   arrayDifference(array1, array2) {
@@ -277,5 +277,4 @@ export default {
 
     return formData
   },
-
 }

@@ -91,7 +91,7 @@ const variantClass = computed(() => {
       props.variant == 'white',
     'border-transparent shadow-sm text-white bg-red-600 hover:bg-red-700 focus:ring-red-500':
       props.variant === 'danger',
-    'border-transparent bg-gray-200 border hover:bg-opacity-60 focus:ring-gray-500 focus:ring-offset-0':
+    'border-transparent bg-gray-200 border hover:bg-gray-200/60 focus:ring-gray-500 focus:ring-offset-0':
       props.variant === 'gray',
   }
 })

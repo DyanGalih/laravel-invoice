@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
+import createUuid from '@/scripts/helpers/uuid'
 
 export const useNotificationStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
 
-  return defineStoreFunc({
-    id: 'notification',
+  return defineStoreFunc('notification', {
 
     state: () => ({
       active: false,
@@ -16,7 +16,7 @@ export const useNotificationStore = (useWindow = false) => {
       showNotification(notification) {
         this.notifications.push({
           ...notification,
-          id: (Math.random().toString(36) + Date.now().toString(36)).substr(2),
+          id: createUuid(),
         })
       },
 
@@ -24,7 +24,7 @@ export const useNotificationStore = (useWindow = false) => {
         this.notifications = this.notifications.filter((notification) => {
           return notification.id != data.id
         })
-      }
-    }
+      },
+    },
   })()
 }

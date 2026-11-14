@@ -127,7 +127,7 @@
 </template>
 
 <script setup>
-import { SaveIcon } from '@heroicons/vue/solid'
+import { ArrowDownTrayIcon as SaveIcon } from '@heroicons/vue/24/solid'
 import { ref, computed } from 'vue'
 import { useGlobalStore } from '@/scripts/customer/stores/global'
 import { useUserStore } from '@/scripts/customer/stores/user'

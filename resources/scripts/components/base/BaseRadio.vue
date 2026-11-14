@@ -41,12 +41,13 @@
 <script setup>
 import { computed } from 'vue'
 import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue'
+import createUuid from '@/scripts/helpers/uuid'
 
 const props = defineProps({
   id: {
     type: [String, Number],
     required: false,
-    default: () => `radio_${Math.random().toString(36).substr(2, 9)}`,
+    default: () => `radio_${createUuid()}`,
   },
   label: {
     type: String,

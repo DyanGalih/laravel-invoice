@@ -1,6 +1,6 @@
-import Guid from 'guid'
 import estimateItemStub from './estimate-item'
 import taxStub from './tax'
+import createUuid from '@/scripts/helpers/uuid'
 
 export default function () {
   return {
@@ -26,8 +26,8 @@ export default function () {
     items: [
       {
         ...estimateItemStub,
-        id: Guid.raw(),
-        taxes: [{ ...taxStub, id: Guid.raw() }],
+        id: createUuid(),
+        taxes: [{ ...taxStub, id: createUuid() }],
       },
     ],
     taxes: [],

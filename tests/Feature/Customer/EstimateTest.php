@@ -3,10 +3,13 @@
 namespace Tests\Feature\Customer;
 
 use Crater\Models\Customer;
+use Crater\Models\EmailLog;
 use Crater\Models\Estimate;
+use Crater\Models\Invoice;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
@@ -38,6 +41,20 @@ test('get customer estimate', function () {
 
     getJson("/api/v1/{$customer->company->slug}/customer/estimates/{$estimate->id}")
         ->assertOk();
+});
+
+test('rejects an invoice token on the estimate endpoint', function () {
+    $estimate = Estimate::factory()->create([
+        'customer_id' => Auth::guard('customer')->id(),
+    ]);
+
+    $emailLog = EmailLog::factory()->create([
+        'mailable_type' => Invoice::class,
+        'mailable_id' => $estimate->id,
+        'token' => 'invoice-token-for-estimate',
+    ]);
+
+    getJson("/customer/estimates/{$emailLog->token}")->assertForbidden();
 });
 
 test('customer estimate mark as accepted', function () {

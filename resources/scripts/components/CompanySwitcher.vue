@@ -15,7 +15,7 @@
         bg-white
         rounded
         cursor-pointer
-        bg-opacity-20
+        bg-white/20
       "
       @click="isShow = !isShow"
     >

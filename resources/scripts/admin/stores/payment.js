@@ -11,8 +11,7 @@ export const usePaymentStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
   const { global } = window.i18n
 
-  return defineStoreFunc({
-    id: 'payment',
+  return defineStoreFunc('payment', {
 
     state: () => ({
       payments: [],
@@ -210,7 +209,7 @@ export const usePaymentStore = (useWindow = false) => {
               })
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('payments.deleted_message', 2),
+                message: global.t('payments.deleted_message', 2),
               })
               resolve(response)
             })

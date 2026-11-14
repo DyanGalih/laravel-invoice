@@ -20,56 +20,20 @@
       <thead>
         <tr>
           <th
-            class="
-              px-5
-              py-3
-              text-sm
-              not-italic
-              font-medium
-              leading-5
-              text-left text-gray-700
-              border-t border-b border-gray-200 border-solid
-            "
+            class="px-5 py-3 text-sm not-italic font-medium leading-5 text-left text-gray-700 border-t border-b border-gray-200 border-solid"
           ></th>
           <th
-            class="
-              px-5
-              py-3
-              text-sm
-              not-italic
-              font-medium
-              leading-5
-              text-left text-gray-700
-              border-t border-b border-gray-200 border-solid
-            "
+            class="px-5 py-3 text-sm not-italic font-medium leading-5 text-left text-gray-700 border-t border-b border-gray-200 border-solid"
           >
             Component
           </th>
           <th
-            class="
-              px-5
-              py-3
-              text-sm
-              not-italic
-              font-medium
-              leading-5
-              text-left text-gray-700
-              border-t border-b border-gray-200 border-solid
-            "
+            class="px-5 py-3 text-sm not-italic font-medium leading-5 text-left text-gray-700 border-t border-b border-gray-200 border-solid"
           >
             Parameter
           </th>
           <th
-            class="
-              px-5
-              py-3
-              text-sm
-              not-italic
-              font-medium
-              leading-5
-              text-left text-gray-700
-              border-t border-b border-gray-200 border-solid
-            "
+            class="px-5 py-3 text-sm not-italic font-medium leading-5 text-left text-gray-700 border-t border-b border-gray-200 border-solid"
           ></th>
         </tr>
       </thead>
@@ -88,16 +52,7 @@
             </td>
             <td class="px-5 py-4">
               <label
-                class="
-                  block
-                  text-sm
-                  not-italic
-                  font-medium
-                  text-primary-800
-                  whitespace-nowrap
-                  mr-2
-                  min-w-[200px]
-                "
+                class="block text-sm not-italic font-medium text-primary-800 whitespace-nowrap mr-2 min-w-[200px]"
               >
                 {{ element.label }}
               </label>
@@ -200,11 +155,11 @@ import { ref, computed, reactive, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import draggable from 'vuedraggable'
-import Guid from 'guid'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 import DragIcon from '@/scripts/components/icons/DragIcon.vue'
+import createUuid from '@/scripts/helpers/uuid'
 
 const props = defineProps({
   type: {
@@ -355,7 +310,7 @@ async function setInitialFields() {
 
     const value = placeholder.value ?? ''
 
-    selectedFields.value.push({ ...found, value, id: Guid.raw() })
+    selectedFields.value.push({ ...found, value, id: createUuid() })
   })
 
   isLoadingPlaceholders.value = false
@@ -372,7 +327,7 @@ function onSelectField(field) {
     return
   }
 
-  selectedFields.value.push({ ...field, id: Guid.raw() })
+  selectedFields.value.push({ ...field, id: createUuid() })
 
   fetchNextNumber()
 }

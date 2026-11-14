@@ -52,11 +52,7 @@
                 masked: false,
               }"
               :invalid="v$.currentTaxType.percent.$error"
-              class="
-                relative
-                w-full
-                focus:border focus:border-solid focus:border-primary
-              "
+              class="relative w-full focus:border focus:border-solid focus:border-primary"
               @input="v$.currentTaxType.percent.$touch()"
             />
           </BaseInputGroup>
@@ -91,13 +87,7 @@
         </BaseInputGrid>
       </div>
       <div
-        class="
-          z-0
-          flex
-          justify-end
-          p-4
-          border-t border-solid border--200 border-modal-bg
-        "
+        class="z-0 flex justify-end p-4 border-t border-solid border--200 border-modal-bg"
       >
         <BaseButton
           class="mr-3 text-sm"
@@ -136,7 +126,6 @@ import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import { useInvoiceStore } from '@/scripts/admin/stores/invoice'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Guid from 'guid'
 import TaxStub from '@/scripts/admin/stub/abilities'
 import {
   required,
@@ -146,6 +135,7 @@ import {
   helpers,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
+import createUuid from '@/scripts/helpers/uuid'
 
 const taxTypeStore = useTaxTypeStore()
 const modalStore = useModalStore()
@@ -162,20 +152,20 @@ const rules = computed(() => {
         required: helpers.withMessage(t('validation.required'), required),
         minLength: helpers.withMessage(
           t('validation.name_min_length', { count: 3 }),
-          minLength(3)
+          minLength(3),
         ),
       },
       percent: {
         required: helpers.withMessage(t('validation.required'), required),
         between: helpers.withMessage(
           t('validation.enter_valid_tax_rate'),
-          between(0, 100)
+          between(0, 100),
         ),
       },
       description: {
         maxLength: helpers.withMessage(
           t('validation.description_maxlength', { count: 255 }),
-          maxLength(255)
+          maxLength(255),
         ),
       },
     },
@@ -184,7 +174,7 @@ const rules = computed(() => {
 
 const v$ = useVuelidate(
   rules,
-  computed(() => taxTypeStore)
+  computed(() => taxTypeStore),
 )
 
 async function submitTaxTypeData() {
@@ -214,16 +204,16 @@ function SelectTax(taxData) {
       ((estimateStore.getSubtotalWithDiscount +
         estimateStore.getTotalSimpleTax) *
         taxData.percent) /
-        100
+        100,
     )
   } else if (estimateStore.getSubtotalWithDiscount && taxData.percent) {
     amount = Math.round(
-      (estimateStore.getSubtotalWithDiscount * taxData.percent) / 100
+      (estimateStore.getSubtotalWithDiscount * taxData.percent) / 100,
     )
   }
   let data = {
     ...TaxStub,
-    id: Guid.raw(),
+    id: createUuid(),
     name: taxData.name,
     percent: taxData.percent,
     compound_tax: taxData.compound_tax,
@@ -239,7 +229,7 @@ function selectItemTax(taxData) {
   if (modalStore.data) {
     let data = {
       ...TaxStub,
-      id: Guid.raw(),
+      id: createUuid(),
       name: taxData.name,
       percent: taxData.percent,
       compound_tax: taxData.compound_tax,

@@ -10,6 +10,7 @@ use Crater\Models\Module as ModelsModule;
 use Crater\Models\Setting;
 use File;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Str;
 use Nwidart\Modules\Facades\Module;
 use ZipArchive;
 
@@ -70,15 +71,15 @@ class ModuleInstaller
 
     public static function upload($request)
     {
-        // Create temp directory
-        $temp_dir = storage_path('app/temp-'.md5(mt_rand()));
+        // Create a unique working directory
+        $temp_dir = storage_path('app/working-'.Str::uuid()->toString());
 
         if (! File::isDirectory($temp_dir)) {
             File::makeDirectory($temp_dir);
         }
 
         $path = $request->file('avatar')->storeAs(
-            'temp-'.md5(mt_rand()),
+            'working-'.Str::uuid()->toString(),
             $request->module.'.zip',
             'local'
         );
@@ -119,8 +120,8 @@ class ModuleInstaller
             $data = $response->getBody()->getContents();
         }
 
-        // Create temp directory
-        $temp_dir = storage_path('app/temp-'.md5(mt_rand()));
+        // Create a unique working directory
+        $temp_dir = storage_path('app/working-'.Str::uuid()->toString());
 
         if (! File::isDirectory($temp_dir)) {
             File::makeDirectory($temp_dir);
@@ -147,7 +148,7 @@ class ModuleInstaller
             throw new \Exception('Zip file not found');
         }
 
-        $temp_extract_dir = storage_path('app/temp2-'.md5(mt_rand()));
+        $temp_extract_dir = storage_path('app/extract-'.Str::uuid()->toString());
 
         if (! File::isDirectory($temp_extract_dir)) {
             File::makeDirectory($temp_extract_dir);
@@ -182,7 +183,7 @@ class ModuleInstaller
             return false;
         }
 
-        // Delete temp directory
+        // Delete the working directory
         File::deleteDirectory($temp_extract_dir);
 
         return true;

@@ -2,8 +2,7 @@ import { handleError } from '@/scripts/customer/helpers/error-handling'
 import { useUserStore } from './user'
 const { defineStore } = window.pinia
 import axios from 'axios'
-export const useGlobalStore = defineStore({
-  id: 'CustomerPortalGlobalStore',
+export const useGlobalStore = defineStore('CustomerPortalGlobalStore', {
   state: () => ({
     languages: [],
     currency: null,

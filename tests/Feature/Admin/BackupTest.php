@@ -6,8 +6,13 @@ use Crater\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
+
+use Spatie\Backup\Config\Config;
+use Spatie\Backup\Tasks\Backup\BackupJob;
+use Spatie\Backup\Tasks\Backup\BackupJobFactory;
 
 beforeEach(function () {
     Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
@@ -54,4 +59,10 @@ test('create backup', function () {
             "local",
         ],
     ]);
+});
+
+test('backup configuration builds a backup v10 job', function () {
+    $job = BackupJobFactory::createFromConfig(app(Config::class));
+
+    expect($job)->toBeInstanceOf(BackupJob::class);
 });
