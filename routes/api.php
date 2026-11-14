@@ -144,15 +144,15 @@ Route::prefix('/v1')->group(function () {
     //----------------------------------
 
     Route::group(['prefix' => 'auth'], function () {
-        Route::post('login', [AuthController::class, 'login']);
+        Route::post('login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
 
         Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
         // Send reset password mail
-        Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware("throttle:10,2");
+        Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:password-reset');
 
         // handle reset password form process
-        Route::post('reset/password', [ResetPasswordController::class, 'reset']);
+        Route::post('reset/password', [ResetPasswordController::class, 'reset'])->middleware('throttle:password-reset');
     });
 
 
@@ -502,10 +502,10 @@ Route::prefix('/v1')->group(function () {
         Route::group(['prefix' => 'auth'], function () {
 
             // Send reset password mail
-            Route::post('password/email', [AuthForgotPasswordController::class, 'sendResetLinkEmail']);
+            Route::post('password/email', [AuthForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:password-reset');
 
             // handle reset password form process
-            Route::post('reset/password', [AuthResetPasswordController::class, 'reset'])->name('customer.password.reset');
+            Route::post('reset/password', [AuthResetPasswordController::class, 'reset'])->middleware('throttle:password-reset')->name('customer.password.reset');
         });
 
 

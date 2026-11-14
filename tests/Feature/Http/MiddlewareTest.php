@@ -23,14 +23,16 @@ test('every route middleware alias is registered', function () {
     expect($referencedAliases->diff(array_keys($aliases))->values()->all())->toBe([]);
 });
 
-test('CORS preflight keeps the configured wildcard policy', function () {
+test('CORS preflight respects the configured allowed origins', function () {
+    config(['cors.allowed_origins' => ['https://customer.example']]);
+
     $response = $this->call('OPTIONS', '/api/v1/cors-check', [], [], [], [
         'HTTP_ORIGIN' => 'https://customer.example',
         'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'GET',
     ]);
 
     $response->assertNoContent();
-    expect($response->headers->get('Access-Control-Allow-Origin'))->toBe('*');
+    expect($response->headers->get('Access-Control-Allow-Origin'))->toBe('https://customer.example');
 });
 
 test('forwarded headers are ignored when no proxy is trusted', function () {
