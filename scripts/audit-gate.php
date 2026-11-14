@@ -13,14 +13,28 @@ $appDir = dirname(__DIR__);
  */
 function executeAuditCommand(string $command, string $cwd): array
 {
+    $stdoutFile = tempnam(sys_get_temp_dir(), 'audit_out_');
+    $stderrFile = tempnam(sys_get_temp_dir(), 'audit_err_');
+
+    if ($stdoutFile === false || $stderrFile === false) {
+        return [
+            'exit_code' => -1,
+            'stdout' => '',
+            'stderr' => 'Failed to create temporary output files.',
+        ];
+    }
+
     $descriptorSpec = [
         0 => ['pipe', 'r'],
-        1 => ['pipe', 'w'],
-        2 => ['pipe', 'w'],
+        1 => ['file', $stdoutFile, 'w'],
+        2 => ['file', $stderrFile, 'w'],
     ];
 
     $process = proc_open($command, $descriptorSpec, $pipes, $cwd);
     if (! is_resource($process)) {
+        @unlink($stdoutFile);
+        @unlink($stderrFile);
+
         return [
             'exit_code' => -1,
             'stdout' => '',
@@ -28,18 +42,22 @@ function executeAuditCommand(string $command, string $cwd): array
         ];
     }
 
-    fclose($pipes[0]);
-    $stdout = stream_get_contents($pipes[1]);
-    fclose($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    fclose($pipes[2]);
+    if (isset($pipes[0]) && is_resource($pipes[0])) {
+        fclose($pipes[0]);
+    }
 
     $exitCode = proc_close($process);
 
+    $stdout = is_file($stdoutFile) ? (string) file_get_contents($stdoutFile) : '';
+    $stderr = is_file($stderrFile) ? (string) file_get_contents($stderrFile) : '';
+
+    @unlink($stdoutFile);
+    @unlink($stderrFile);
+
     return [
         'exit_code' => $exitCode,
-        'stdout' => (string) $stdout,
-        'stderr' => (string) $stderr,
+        'stdout' => $stdout,
+        'stderr' => $stderr,
     ];
 }
 

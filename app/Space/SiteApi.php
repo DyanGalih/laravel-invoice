@@ -139,11 +139,42 @@ trait SiteApi
                 if (! is_resource($stream)) {
                     throw new RuntimeException('Unable to read package entry.');
                 }
-                $contents = stream_get_contents($stream);
-                fclose($stream);
-                if (file_put_contents($target, $contents, LOCK_EX) === false) {
-                    throw new RuntimeException('Unable to extract package entry.');
+
+                $targetHandle = fopen($target, 'wb');
+                if (! is_resource($targetHandle)) {
+                    fclose($stream);
+
+                    throw new RuntimeException('Unable to open destination file for extraction.');
                 }
+
+                $maxEntryBytes = 50 * 1024 * 1024;
+                $entryBytes = 0;
+
+                while (! feof($stream)) {
+                    $chunk = fread($stream, 65536);
+                    if ($chunk === false) {
+                        fclose($stream);
+                        fclose($targetHandle);
+
+                        throw new RuntimeException('Error reading package entry stream.');
+                    }
+                    $entryBytes += strlen($chunk);
+                    if ($entryBytes > $maxEntryBytes) {
+                        fclose($stream);
+                        fclose($targetHandle);
+
+                        throw new RuntimeException('Package entry exceeds maximum allowed extraction size.');
+                    }
+                    if (fwrite($targetHandle, $chunk) === false) {
+                        fclose($stream);
+                        fclose($targetHandle);
+
+                        throw new RuntimeException('Unable to write package entry chunk.');
+                    }
+                }
+
+                fclose($stream);
+                fclose($targetHandle);
             }
         } catch (\Throwable $exception) {
             $zip->close();
