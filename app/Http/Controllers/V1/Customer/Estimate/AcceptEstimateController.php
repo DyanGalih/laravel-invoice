@@ -29,7 +29,15 @@ class AcceptEstimateController extends Controller
             return response()->json(['error' => 'estimate_not_found'], 404);
         }
 
-        $estimate->update($request->only('status'));
+        $newStatus = (string) $request->input('status');
+        if (! in_array($newStatus, [Estimate::STATUS_ACCEPTED, Estimate::STATUS_REJECTED], true) || ! $estimate->canTransitionTo($newStatus)) {
+            return response()->json([
+                'error' => 'invalid_status_transition',
+                'message' => 'Customers can only accept or reject eligible estimates.',
+            ], 422);
+        }
+
+        $estimate->update(['status' => $newStatus]);
 
         return new EstimateResource($estimate);
     }
