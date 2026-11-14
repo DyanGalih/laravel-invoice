@@ -61,6 +61,43 @@ test('dependency audit gate fails on unapproved critical or high advisories and 
     expect($blockedResult['status'])->toBe('BLOCKED')
         ->and($blockedResult['blocking_findings'])->not->toBeEmpty();
 
+    // Expired disposition should still block
+    $expiredDisposition = [
+        'vulnerable/package' => [
+            'advisory' => 'PKSA-test-1234',
+            'owner' => 'Security Team',
+            'mitigation' => 'Temporary test exception',
+            'expiry' => '2020-01-01',
+        ],
+    ];
+    $expiredResult = SecurityReleaseAssurance::evaluateDependencyAudits($unapprovedComposer, [], $expiredDisposition);
+    expect($expiredResult['status'])->toBe('BLOCKED');
+
+    // Mismatched advisory ID should still block
+    $mismatchedDisposition = [
+        'vulnerable/package' => [
+            'advisory' => 'PKSA-other-9999',
+            'owner' => 'Security Team',
+            'mitigation' => 'Temporary test exception',
+            'expiry' => '2030-01-01',
+        ],
+    ];
+    $mismatchedResult = SecurityReleaseAssurance::evaluateDependencyAudits($unapprovedComposer, [], $mismatchedDisposition);
+    expect($mismatchedResult['status'])->toBe('BLOCKED');
+
+    // Valid, unexpired, matching disposition passes
+    $validDisposition = [
+        'vulnerable/package' => [
+            'advisory' => 'PKSA-test-1234',
+            'owner' => 'Security Team',
+            'mitigation' => 'Temporary test exception',
+            'expiry' => '2030-01-01',
+        ],
+    ];
+    $approvedResult = SecurityReleaseAssurance::evaluateDependencyAudits($unapprovedComposer, [], $validDisposition);
+    expect($approvedResult['status'])->toBe('PASS')
+        ->and($approvedResult['blocking_findings'])->toBeEmpty();
+
     $cleanResult = SecurityReleaseAssurance::evaluateDependencyAudits(
         ['advisories' => [], 'abandoned' => []],
         ['vulnerabilities' => []]
@@ -96,6 +133,26 @@ test('release evidence validation enforces independent reviewer and rejects cred
     $rejected = SecurityReleaseAssurance::validateReleaseEvidence($leakedCredentials);
     expect($rejected['status'])->toBe('PENDING')
         ->and($rejected['valid'])->toBeFalse();
+
+    // Expired or missing exception with high findings should be rejected
+    $unapprovedFindings = [
+        'independent_reviewer' => 'Alice Auditor',
+        'review_timestamp' => date(DATE_ATOM),
+        'severity_counts' => ['CRITICAL' => 1, 'HIGH' => 0, 'MEDIUM' => 0, 'LOW' => 0],
+        'approved_exceptions' => [
+            [
+                'advisory' => 'TEST-ADV-1',
+                'owner' => 'SecOps',
+                'mitigation' => 'Firewall mitigation',
+                'expiry' => '2020-01-01',
+            ],
+        ],
+        'dependency_audit_evidence' => ['status' => 'PASS'],
+        'runtime_assurance_results' => ['status' => 'PASS'],
+    ];
+    $unapprovedResult = SecurityReleaseAssurance::validateReleaseEvidence($unapprovedFindings);
+    expect($unapprovedResult['status'])->toBe('PENDING')
+        ->and($unapprovedResult['valid'])->toBeFalse();
 
     $validEvidence = [
         'independent_reviewer' => 'Alice Auditor',

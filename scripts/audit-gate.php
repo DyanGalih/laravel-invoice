@@ -8,15 +8,76 @@ use Crater\Space\SecurityReleaseAssurance;
 
 $appDir = dirname(__DIR__);
 
+/**
+ * Run a command and return its exit code, stdout, and stderr.
+ */
+function executeAuditCommand(string $command, string $cwd): array
+{
+    $descriptorSpec = [
+        0 => ['pipe', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w'],
+    ];
+
+    $process = proc_open($command, $descriptorSpec, $pipes, $cwd);
+    if (! is_resource($process)) {
+        return [
+            'exit_code' => -1,
+            'stdout' => '',
+            'stderr' => 'Failed to spawn audit process.',
+        ];
+    }
+
+    fclose($pipes[0]);
+    $stdout = stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]);
+    fclose($pipes[2]);
+
+    $exitCode = proc_close($process);
+
+    return [
+        'exit_code' => $exitCode,
+        'stdout' => (string) $stdout,
+        'stderr' => (string) $stderr,
+    ];
+}
+
 // 1. Composer audit
 $composerCommand = 'composer audit --locked --no-dev --no-interaction --format=json';
-$composerOutput = shell_exec("cd {$appDir} && {$composerCommand} 2>&1");
-$composerAudit = json_decode($composerOutput ?: '{}', true) ?: [];
+$composerResult = executeAuditCommand($composerCommand, $appDir);
+$composerAudit = json_decode($composerResult['stdout'], true);
+
+if (! is_array($composerAudit) || json_last_error() !== JSON_ERROR_NONE) {
+    fwrite(STDERR, "Composer audit failed to produce valid JSON output.\n");
+    if (! empty($composerResult['stderr'])) {
+        fwrite(STDERR, "Stderr: {$composerResult['stderr']}\n");
+    }
+    exit(1);
+}
+
+if (! isset($composerAudit['advisories']) && ! isset($composerAudit['abandoned'])) {
+    fwrite(STDERR, "Composer audit returned unexpected payload structure.\n");
+    exit(1);
+}
 
 // 2. npm audit
 $npmCommand = 'npm audit --package-lock-only --omit=dev --json';
-$npmOutput = shell_exec("cd {$appDir} && {$npmCommand} 2>&1");
-$npmAudit = json_decode($npmOutput ?: '{}', true) ?: [];
+$npmResult = executeAuditCommand($npmCommand, $appDir);
+$npmAudit = json_decode($npmResult['stdout'], true);
+
+if (! is_array($npmAudit) || json_last_error() !== JSON_ERROR_NONE) {
+    fwrite(STDERR, "npm audit failed to produce valid JSON output.\n");
+    if (! empty($npmResult['stderr'])) {
+        fwrite(STDERR, "Stderr: {$npmResult['stderr']}\n");
+    }
+    exit(1);
+}
+
+if (! isset($npmAudit['vulnerabilities']) && ! isset($npmAudit['auditReportVersion'])) {
+    fwrite(STDERR, "npm audit returned unexpected payload structure.\n");
+    exit(1);
+}
 
 // 3. Evaluate audits
 $evaluation = SecurityReleaseAssurance::evaluateDependencyAudits($composerAudit, $npmAudit);
@@ -40,12 +101,19 @@ $evidence = [
 ];
 
 $outputDir = $appDir.'/storage/reports';
-if (! is_dir($outputDir)) {
-    mkdir($outputDir, 0755, true);
+if (! is_dir($outputDir) && ! @mkdir($outputDir, 0755, true) && ! is_dir($outputDir)) {
+    fwrite(STDERR, "Failed to create directory {$outputDir}\n");
+    exit(1);
 }
 
 $evidenceFile = $outputDir.'/release-evidence.json';
-file_put_contents($evidenceFile, json_encode($evidence, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+$payload = json_encode($evidence, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+$bytesWritten = @file_put_contents($evidenceFile, $payload);
+
+if ($bytesWritten === false || $bytesWritten !== strlen($payload)) {
+    fwrite(STDERR, "Failed to write audit evidence to {$evidenceFile}\n");
+    exit(1);
+}
 
 echo "Audit evidence written to {$evidenceFile}\n";
 echo "Status: {$evaluation['status']}\n";

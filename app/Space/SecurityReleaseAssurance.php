@@ -50,6 +50,55 @@ class SecurityReleaseAssurance
     ];
 
     /**
+     * Determine if a package finding has an approved, unexpired disposition.
+     *
+     * @param  mixed  $disposition
+     * @param  string|null  $findingAdvisory
+     * @return bool
+     */
+    public static function isDispositionApproved($disposition, ?string $findingAdvisory = null): bool
+    {
+        if (empty($disposition) || ! is_array($disposition)) {
+            return false;
+        }
+
+        // Support indexed list of dispositions for the same package
+        if (isset($disposition[0]) && is_array($disposition[0])) {
+            foreach ($disposition as $item) {
+                if (self::isDispositionApproved($item, $findingAdvisory)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        if (empty($disposition['owner']) || empty($disposition['mitigation']) || empty($disposition['expiry'])) {
+            return false;
+        }
+
+        try {
+            $expiry = new DateTime((string) $disposition['expiry']);
+            $today = new DateTime('today');
+            if ($expiry < $today) {
+                return false;
+            }
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        if ($findingAdvisory !== null && ! empty($disposition['advisory'])) {
+            $expected = strtoupper(trim((string) $disposition['advisory']));
+            $actual = strtoupper(trim((string) $findingAdvisory));
+            if ($expected !== $actual && ! str_contains($actual, $expected)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Validate audit payloads from Composer and npm.
      *
      * @param  array  $composerAudit
@@ -89,7 +138,9 @@ class SecurityReleaseAssurance
                     'severity' => $severity,
                 ];
 
-                if (! isset($dispositions[$package]) && in_array($severity, ['CRITICAL', 'HIGH'], true)) {
+                $isExempt = isset($dispositions[$package]) && self::isDispositionApproved($dispositions[$package], $advisoryId);
+
+                if (! $isExempt && in_array($severity, ['CRITICAL', 'HIGH'], true)) {
                     $blockingFindings[] = "Composer package {$package} has unapproved {$severity} advisory {$advisoryId}";
                 }
             }
@@ -97,7 +148,9 @@ class SecurityReleaseAssurance
 
         if (! empty($composerAudit['abandoned'])) {
             foreach ($composerAudit['abandoned'] as $package => $replacement) {
-                if (! isset($dispositions[$package])) {
+                $isExempt = isset($dispositions[$package]) && self::isDispositionApproved($dispositions[$package]);
+
+                if (! $isExempt) {
                     $blockingFindings[] = "Composer package {$package} is abandoned without an approved disposition";
                 }
             }
@@ -121,7 +174,37 @@ class SecurityReleaseAssurance
                 'severity' => $severity,
             ];
 
-            if (! isset($dispositions[$package]) && in_array($severity, ['CRITICAL', 'HIGH'], true)) {
+            $npmAdvisories = [];
+            if (! empty($details['via']) && is_array($details['via'])) {
+                foreach ($details['via'] as $via) {
+                    if (is_array($via)) {
+                        $adv = $via['url'] ?? $via['source'] ?? null;
+                        if (is_string($adv) && preg_match('/GHSA-[a-z0-9-]+/i', $adv, $m)) {
+                            $npmAdvisories[] = strtoupper($m[0]);
+                        } elseif (! empty($via['id'])) {
+                            $npmAdvisories[] = (string) $via['id'];
+                        }
+                    } elseif (is_string($via) && preg_match('/GHSA-[a-z0-9-]+/i', $via, $m)) {
+                        $npmAdvisories[] = strtoupper($m[0]);
+                    }
+                }
+            }
+
+            $isExempt = false;
+            if (isset($dispositions[$package])) {
+                if (! empty($npmAdvisories)) {
+                    foreach ($npmAdvisories as $adv) {
+                        if (self::isDispositionApproved($dispositions[$package], $adv)) {
+                            $isExempt = true;
+                            break;
+                        }
+                    }
+                } else {
+                    $isExempt = self::isDispositionApproved($dispositions[$package]);
+                }
+            }
+
+            if (! $isExempt && in_array($severity, ['CRITICAL', 'HIGH'], true)) {
                 $blockingFindings[] = "npm package {$package} has unapproved {$severity} vulnerability";
             }
         }
@@ -172,8 +255,25 @@ class SecurityReleaseAssurance
             }
 
             if (($evidence['severity_counts']['CRITICAL'] ?? 0) > 0 || ($evidence['severity_counts']['HIGH'] ?? 0) > 0) {
-                if (empty($evidence['approved_exceptions'])) {
+                if (empty($evidence['approved_exceptions']) || ! is_array($evidence['approved_exceptions'])) {
                     $errors[] = 'Unresolved CRITICAL or HIGH findings require an approved, time-bounded exception.';
+                } else {
+                    foreach ($evidence['approved_exceptions'] as $idx => $exception) {
+                        if (! is_array($exception) || empty($exception['advisory']) || empty($exception['owner']) || empty($exception['mitigation']) || empty($exception['expiry'])) {
+                            $errors[] = "Approved exception #{$idx} must include advisory, owner, mitigation, and expiry.";
+                            continue;
+                        }
+
+                        try {
+                            $expiry = new DateTime((string) $exception['expiry']);
+                            $today = new DateTime('today');
+                            if ($expiry < $today) {
+                                $errors[] = "Approved exception for {$exception['advisory']} has expired.";
+                            }
+                        } catch (\Throwable $e) {
+                            $errors[] = "Approved exception for {$exception['advisory']} has an invalid expiry date format.";
+                        }
+                    }
                 }
             }
         }
@@ -266,7 +366,7 @@ class SecurityReleaseAssurance
                 'extracted_dir' => $extractedDir,
                 'error' => null,
             ];
-        } catch (RuntimeException $e) {
+        } catch (\Throwable $e) {
             return [
                 'status' => 'REJECTED',
                 'error' => $e->getMessage(),
