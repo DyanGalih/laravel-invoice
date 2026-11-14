@@ -18,7 +18,7 @@ async function sourceFiles(directory) {
   const files = []
 
   for (const entry of entries) {
-    const relativePath = path.join(directory, entry.name)
+    const relativePath = path.posix.join(directory, entry.name)
     if (entry.isDirectory()) {
       files.push(...(await sourceFiles(relativePath)))
     } else if (entry.name.endsWith('.js') || entry.name.endsWith('.vue')) {

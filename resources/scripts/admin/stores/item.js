@@ -140,7 +140,7 @@ export const useItemStore = (useWindow = false) => {
 
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('items.deleted_message', 1),
+                message: global.t('items.deleted_message', 1),
               })
 
               resolve(response)
@@ -168,7 +168,7 @@ export const useItemStore = (useWindow = false) => {
 
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('items.deleted_message', 2),
+                message: global.t('items.deleted_message', 2),
               })
 
               resolve(response)
