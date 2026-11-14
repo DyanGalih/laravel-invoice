@@ -6,7 +6,6 @@ use Crater\Models\Customer;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
-
 use function Pest\Laravel\getJson;
 
 beforeEach(function () {

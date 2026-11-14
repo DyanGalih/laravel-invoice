@@ -25,7 +25,9 @@ class ChangeRelationshipOfCompany extends Migration
         }
 
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['company_id']);
+            if (config('database.default') !== 'sqlite') {
+                $table->dropForeign(['company_id']);
+            }
             $table->dropColumn('company_id');
         });
     }

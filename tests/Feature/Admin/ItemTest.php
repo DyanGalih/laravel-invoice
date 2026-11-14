@@ -7,7 +7,6 @@ use Crater\Models\Tax;
 use Crater\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
-
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
@@ -122,7 +121,7 @@ test('delete multiple items', function () {
     postJson("/api/v1/items/delete", $data)->assertOk();
 
     foreach ($items as $item) {
-        $this->assertModelMissing($item);
+        $this->assertDeleted($item);
     }
 });
 

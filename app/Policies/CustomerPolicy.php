@@ -35,7 +35,7 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer)
     {
-        if ($user->hasCompany($customer->company_id) && BouncerFacade::can('view-customer', $customer)) {
+        if (BouncerFacade::can('view-customer', $customer)) {
             return true;
         }
 
@@ -66,7 +66,7 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer)
     {
-        if ($user->hasCompany($customer->company_id) && BouncerFacade::can('edit-customer', $customer)) {
+        if (BouncerFacade::can('edit-customer', $customer)) {
             return true;
         }
 
@@ -82,7 +82,7 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer)
     {
-        if ($user->hasCompany($customer->company_id) && BouncerFacade::can('delete-customer', $customer)) {
+        if (BouncerFacade::can('delete-customer', $customer)) {
             return true;
         }
 
@@ -98,7 +98,7 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer)
     {
-        if ($user->hasCompany($customer->company_id) && BouncerFacade::can('delete-customer', $customer)) {
+        if (BouncerFacade::can('delete-customer', $customer)) {
             return true;
         }
 
@@ -114,7 +114,7 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer)
     {
-        if ($user->hasCompany($customer->company_id) && BouncerFacade::can('delete-customer', $customer)) {
+        if (BouncerFacade::can('delete-customer', $customer)) {
             return true;
         }
 

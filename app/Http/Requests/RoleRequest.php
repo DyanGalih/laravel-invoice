@@ -31,12 +31,10 @@ class RoleRequest extends FormRequest
                 Rule::unique('roles')->where('scope', $this->header('company'))
             ],
             'abilities' => [
-                'required',
-                'array',
+                'required'
             ],
-            'abilities.*.ability' => [
-                'required',
-                Rule::in(array_column(config('abilities.abilities'), 'ability')),
+            'abilities.*' => [
+                'required'
             ]
         ];
 
@@ -55,8 +53,7 @@ class RoleRequest extends FormRequest
 
     public function getRolePayload()
     {
-        return collect($this->validated())
-            ->only(['name', 'title', 'level'])
+        return collect($this->except('abilities'))
             ->merge([
                 'scope' => $this->header('company'),
             ])

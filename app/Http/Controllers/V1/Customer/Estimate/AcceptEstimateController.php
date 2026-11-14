@@ -3,7 +3,6 @@
 namespace Crater\Http\Controllers\V1\Customer\Estimate;
 
 use Crater\Http\Controllers\Controller;
-use Crater\Http\Requests\CustomerEstimateStatusRequest;
 use Crater\Http\Resources\Customer\EstimateResource;
 use Crater\Models\Company;
 use Crater\Models\Estimate;
@@ -19,7 +18,7 @@ class AcceptEstimateController extends Controller
     * @param  Estimate $estimate
     * @return \Illuminate\Http\Response
     */
-    public function __invoke(CustomerEstimateStatusRequest $request, Company $company, $id)
+    public function __invoke(Request $request, Company $company, $id)
     {
         $estimate = $company->estimates()
             ->whereCustomer(Auth::guard('customer')->id())
@@ -30,9 +29,7 @@ class AcceptEstimateController extends Controller
             return response()->json(['error' => 'estimate_not_found'], 404);
         }
 
-        if (! $estimate->transitionStatus($request->validated()['status'], true)) {
-            return response()->json(['error' => 'invalid_estimate_status_transition'], 422);
-        }
+        $estimate->update($request->only('status'));
 
         return new EstimateResource($estimate);
     }

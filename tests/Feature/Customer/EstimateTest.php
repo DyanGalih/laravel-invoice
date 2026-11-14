@@ -7,7 +7,6 @@ use Crater\Models\Estimate;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
-
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 

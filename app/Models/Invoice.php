@@ -3,11 +3,10 @@
 namespace Crater\Models;
 
 use App;
-use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Crater\Mail\SendInvoiceMail;
 use Crater\Services\SerialNumberFormatter;
-use Crater\Traits\CalculatesDocumentTotals;
 use Crater\Traits\GeneratesPdfTrait;
 use Crater\Traits\HasCustomFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,7 +22,6 @@ class Invoice extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
-    use CalculatesDocumentTotals;
     use GeneratesPdfTrait;
     use HasCustomFieldsTrait;
 
@@ -170,21 +168,21 @@ class Invoice extends Model implements HasMedia
 
     public function getFormattedCreatedAtAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y/m/d';
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
     public function getFormattedDueDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y/m/d';
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
         return Carbon::parse($this->due_date)->format($dateFormat);
     }
 
     public function getFormattedInvoiceDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y/m/d';
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
         return Carbon::parse($this->invoice_date)->format($dateFormat);
     }
@@ -289,9 +287,7 @@ class Invoice extends Model implements HasMedia
 
     public function scopeWhereInvoice($query, $invoice_id)
     {
-        $query->where(function ($query) use ($invoice_id) {
-            $query->where('invoices.id', $invoice_id);
-        });
+        $query->orWhere('id', $invoice_id);
     }
 
     public function scopeWhereCompany($query)
@@ -321,22 +317,6 @@ class Invoice extends Model implements HasMedia
     public static function createInvoice($request)
     {
         $data = $request->getInvoicePayload();
-        $prepared = self::prepareDocument(
-            $request->header('company') ?: $data['company_id'],
-            $request->items,
-            $request->taxes,
-            $request->discount,
-            $request->discount_type,
-            $data['tax_per_item'],
-            $request->discount_val
-        );
-        $data = array_merge($data, $prepared['attributes']);
-        $data['base_discount_val'] = $data['discount_val'] * $data['exchange_rate'];
-        $data['base_sub_total'] = $data['sub_total'] * $data['exchange_rate'];
-        $data['base_total'] = $data['total'] * $data['exchange_rate'];
-        $data['base_tax'] = $data['tax'] * $data['exchange_rate'];
-        $data['base_due_amount'] = $data['total'] * $data['exchange_rate'];
-        $data['due_amount'] = $data['total'];
 
         if ($request->has('invoiceSend')) {
             $data['status'] = Invoice::STATUS_SENT;
@@ -355,7 +335,7 @@ class Invoice extends Model implements HasMedia
         $invoice->unique_hash = Hashids::connection(Invoice::class)->encode($invoice->id);
         $invoice->save();
 
-        self::createItems($invoice, $prepared['items']);
+        self::createItems($invoice, $request->items);
 
         $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
 
@@ -363,8 +343,8 @@ class Invoice extends Model implements HasMedia
             ExchangeRateLog::addExchangeRateLog($invoice);
         }
 
-        if (! empty($prepared['taxes'])) {
-            self::createTaxes($invoice, $prepared['taxes']);
+        if ($request->has('taxes') && (! empty($request->taxes))) {
+            self::createTaxes($invoice, $request->taxes);
         }
 
         if ($request->customFields) {
@@ -393,20 +373,6 @@ class Invoice extends Model implements HasMedia
             ->setNextNumbers();
 
         $data = $request->getInvoicePayload();
-        $prepared = self::prepareDocument(
-            $this->company_id,
-            $request->items,
-            $request->taxes,
-            $request->discount,
-            $request->discount_type,
-            $data['tax_per_item'],
-            $request->discount_val
-        );
-        $data = array_merge($data, $prepared['attributes']);
-        $data['base_discount_val'] = $data['discount_val'] * $data['exchange_rate'];
-        $data['base_sub_total'] = $data['sub_total'] * $data['exchange_rate'];
-        $data['base_total'] = $data['total'] * $data['exchange_rate'];
-        $data['base_tax'] = $data['tax'] * $data['exchange_rate'];
         $oldTotal = $this->total;
 
         $total_paid_amount = $this->total - $this->due_amount;
@@ -415,12 +381,12 @@ class Invoice extends Model implements HasMedia
             return 'customer_cannot_be_changed_after_payment_is_added';
         }
 
-        if ($data['total'] < $total_paid_amount) {
+        if ($request->total < $total_paid_amount) {
             return 'total_invoice_amount_must_be_more_than_paid_amount';
         }
 
-        if ($oldTotal != $data['total']) {
-            $oldTotal = (int) round($data['total']) - (int) $oldTotal;
+        if ($oldTotal != $request->total) {
+            $oldTotal = (int) round($request->total) - (int) $oldTotal;
         } else {
             $oldTotal = 0;
         }
@@ -450,10 +416,10 @@ class Invoice extends Model implements HasMedia
         $this->items()->delete();
         $this->taxes()->delete();
 
-        self::createItems($this, $prepared['items']);
+        self::createItems($this, $request->items);
 
-        if (! empty($prepared['taxes'])) {
-            self::createTaxes($this, $prepared['taxes']);
+        if ($request->has('taxes') && (! empty($request->taxes))) {
+            self::createTaxes($this, $request->taxes);
         }
 
         if ($request->customFields) {
@@ -517,9 +483,6 @@ class Invoice extends Model implements HasMedia
         $exchange_rate = $invoice->exchange_rate;
 
         foreach ($invoiceItems as $invoiceItem) {
-            $customFields = $invoiceItem['custom_fields'] ?? [];
-            $taxes = $invoiceItem['taxes'] ?? [];
-            unset($invoiceItem['custom_fields'], $invoiceItem['taxes']);
             $invoiceItem['company_id'] = $invoice->company_id;
             $invoiceItem['exchange_rate'] = $exchange_rate;
             $invoiceItem['base_price'] = $invoiceItem['price'] * $exchange_rate;
@@ -533,21 +496,25 @@ class Invoice extends Model implements HasMedia
 
             $item = $invoice->items()->create($invoiceItem);
 
-            if ($taxes) {
-                foreach ($taxes as $tax) {
+            if (array_key_exists('taxes', $invoiceItem) && $invoiceItem['taxes']) {
+                foreach ($invoiceItem['taxes'] as $tax) {
                     $tax['company_id'] = $invoice->company_id;
                     $tax['exchange_rate'] = $invoice->exchange_rate;
                     $tax['base_amount'] = $tax['amount'] * $exchange_rate;
                     $tax['currency_id'] = $invoice->currency_id;
 
                     if (gettype($tax['amount']) !== "NULL") {
+                        if (array_key_exists('recurring_invoice_id', $invoiceItem)) {
+                            unset($invoiceItem['recurring_invoice_id']);
+                        }
+
                         $item->taxes()->create($tax);
                     }
                 }
             }
 
-            if ($customFields) {
-                $item->addCustomFields($customFields);
+            if (array_key_exists('custom_fields', $invoiceItem) && $invoiceItem['custom_fields']) {
+                $item->addCustomFields($invoiceItem['custom_fields']);
             }
         }
     }
@@ -696,7 +663,7 @@ class Invoice extends Model implements HasMedia
         foreach ($templates as $key => $template) {
             $templateName = Str::before(basename($template), '.blade.php');
             $invoiceTemplates[$key]['name'] = $templateName;
-            $invoiceTemplates[$key]['path'] = asset('build/img/PDF/'.$templateName.'.png');
+            $invoiceTemplates[$key]['path'] = vite_asset('img/PDF/'.$templateName.'.png');
         }
 
         return $invoiceTemplates;
@@ -741,16 +708,10 @@ class Invoice extends Model implements HasMedia
         $this->save();
     }
 
-    public static function deleteInvoices($ids, $companyId = null)
+    public static function deleteInvoices($ids)
     {
-        $companyId = $companyId ?: request()->header('company');
-
         foreach ($ids as $id) {
-            $invoice = self::where('company_id', $companyId)->find($id);
-
-            if (! $invoice) {
-                continue;
-            }
+            $invoice = self::find($id);
 
             if ($invoice->transactions()->exists()) {
                 $invoice->transactions()->delete();

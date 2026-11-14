@@ -6,7 +6,6 @@ use Crater\Models\CustomField;
 use Crater\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
-
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
@@ -93,5 +92,5 @@ test('delete custom field', function () {
             'success' => true,
         ]);
 
-    $this->assertModelMissing($customField);
+    $this->assertDeleted($customField);
 });

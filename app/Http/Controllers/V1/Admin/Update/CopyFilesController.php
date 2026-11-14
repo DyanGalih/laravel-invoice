@@ -24,17 +24,10 @@ class CopyFilesController extends Controller
         }
 
         $request->validate([
-            'path' => ['required', 'string'],
+            'path' => 'required',
         ]);
 
         $path = Updater::copyFiles($request->path);
-
-        if ($path !== true) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Unable to copy verified update files.',
-            ], 422);
-        }
 
         return response()->json([
             'success' => true,

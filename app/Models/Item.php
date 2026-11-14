@@ -63,9 +63,7 @@ class Item extends Model
 
     public function scopeWhereItem($query, $item_id)
     {
-        $query->where(function ($query) use ($item_id) {
-            $query->where('items.id', $item_id);
-        });
+        $query->orWhere('id', $item_id);
     }
 
     public function scopeApplyFilters($query, array $filters)

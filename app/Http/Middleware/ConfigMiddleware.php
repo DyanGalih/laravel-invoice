@@ -18,12 +18,9 @@ class ConfigMiddleware
     {
         if (\Storage::disk('local')->has('database_created')) {
             if ($request->has('file_disk_id')) {
-                $file_disk = FileDisk::forCompany($request->header('company'))
-                    ->find($request->file_disk_id);
+                $file_disk = FileDisk::find($request->file_disk_id);
             } else {
-                $file_disk = FileDisk::forCompany($request->header('company'))
-                    ->whereSetAsDefault(true)
-                    ->first();
+                $file_disk = FileDisk::whereSetAsDefault(true)->first();
             }
 
             if ($file_disk) {

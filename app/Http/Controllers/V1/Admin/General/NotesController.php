@@ -50,10 +50,9 @@ class NotesController extends Controller
      * @param  \Crater\Models\Note  $note
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Note $note)
+    public function show(Note $note)
     {
-        $note = Note::where('company_id', $request->header('company'))->findOrFail($note->id);
-        $this->authorize('view notes', $note);
+        $this->authorize('view notes');
 
         return new NoteResource($note);
     }
@@ -67,8 +66,7 @@ class NotesController extends Controller
      */
     public function update(NotesRequest $request, Note $note)
     {
-        $note = Note::where('company_id', $request->header('company'))->findOrFail($note->id);
-        $this->authorize('manage notes', $note);
+        $this->authorize('manage notes');
 
         $note->update($request->getNotesPayload());
 
@@ -81,10 +79,9 @@ class NotesController extends Controller
      * @param  \Crater\Models\Note  $note
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, Note $note)
+    public function destroy(Note $note)
     {
-        $note = Note::where('company_id', $request->header('company'))->findOrFail($note->id);
-        $this->authorize('manage notes', $note);
+        $this->authorize('manage notes');
 
         $note->delete();
 

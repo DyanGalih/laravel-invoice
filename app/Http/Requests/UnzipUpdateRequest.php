@@ -30,8 +30,7 @@ class UnzipUpdateRequest extends FormRequest
             ],
             'module' => [
                 'required',
-                'string',
-                'regex:/^[A-Za-z][A-Za-z0-9_-]{0,99}$/',
+                'string'
             ]
         ];
     }

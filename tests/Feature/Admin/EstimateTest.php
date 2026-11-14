@@ -6,7 +6,6 @@ use Crater\Http\Requests\DeleteEstimatesRequest;
 use Crater\Http\Requests\EstimatesRequest;
 use Crater\Http\Requests\SendEstimatesRequest;
 use Crater\Mail\SendEstimateMail;
-use Crater\Models\CompanySetting;
 use Crater\Models\Estimate;
 use Crater\Models\EstimateItem;
 use Crater\Models\Tax;
@@ -56,8 +55,13 @@ test('create estimate', function () {
         'template_name' => $estimate['template_name'],
         'estimate_number' => $estimate['estimate_number'],
         'discount_type' => $estimate['discount_type'],
+        'discount_val' => $estimate['discount_val'],
+        'sub_total' => $estimate['sub_total'],
+        'discount' => $estimate['discount'],
         'customer_id' => $estimate['customer_id'],
+        'total' => $estimate['total'],
         'notes' => $estimate['notes'],
+        'tax' => $estimate['tax'],
     ]);
 });
 
@@ -97,8 +101,13 @@ test('update estimate', function () {
         'template_name' => $estimate2['template_name'],
         'estimate_number' => $estimate2['estimate_number'],
         'discount_type' => $estimate2['discount_type'],
+        'discount_val' => $estimate2['discount_val'],
+        'sub_total' => $estimate2['sub_total'],
+        'discount' => $estimate2['discount'],
         'customer_id' => $estimate2['customer_id'],
+        'total' => $estimate2['total'],
         'notes' => $estimate2['notes'],
+        'tax' => $estimate2['tax'],
     ]);
 
     $this->assertDatabaseHas('estimate_items', [
@@ -250,7 +259,7 @@ test('delete multiple estimates', function () {
         ]);
 
     foreach ($estimates as $estimate) {
-        $this->assertModelMissing($estimate);
+        $this->assertDeleted($estimate);
     }
 });
 
@@ -259,10 +268,6 @@ test('get estimate templates', function () {
 });
 
 test('create estimate with tax per item', function () {
-    CompanySetting::setSettings([
-        'tax_per_item' => 'YES',
-    ], User::find(1)->companies()->first()->id);
-
     $estimate = Estimate::factory()->raw([
         'estimate_number' => 'EST-000006',
         'tax_per_item' => 'YES',
@@ -283,8 +288,13 @@ test('create estimate with tax per item', function () {
         'template_name' => $estimate['template_name'],
         'estimate_number' => $estimate['estimate_number'],
         'discount_type' => $estimate['discount_type'],
+        'discount_val' => $estimate['discount_val'],
+        'sub_total' => $estimate['sub_total'],
+        'discount' => $estimate['discount'],
         'customer_id' => $estimate['customer_id'],
+        'total' => $estimate['total'],
         'notes' => $estimate['notes'],
+        'tax' => $estimate['tax'],
     ]);
 
     $this->assertDatabaseHas('estimate_items', [
@@ -337,12 +347,18 @@ test('create estimate with EUR currency', function () {
         'template_name' => $estimate['template_name'],
         'estimate_number' => $estimate['estimate_number'],
         'discount_type' => $estimate['discount_type'],
+        'discount_val' => $estimate['discount_val'],
+        'sub_total' => $estimate['sub_total'],
+        'discount' => $estimate['discount'],
         'customer_id' => $estimate['customer_id'],
+        'total' => $estimate['total'],
         'notes' => $estimate['notes'],
+        'tax' => $estimate['tax'],
     ]);
 
     $this->assertDatabaseHas('taxes', [
-        'tax_type_id' => $estimate['taxes'][0]['tax_type_id']
+        'tax_type_id' => $estimate['taxes'][0]['tax_type_id'],
+        'amount' => $estimate['tax']
     ]);
 
     $this->assertDatabaseHas('estimate_items', [
@@ -404,14 +420,26 @@ test('update estimate with EUR currency', function () {
         'template_name' => $estimate2['template_name'],
         'estimate_number' => $estimate2['estimate_number'],
         'discount_type' => $estimate2['discount_type'],
+        'discount_val' => $estimate2['discount_val'],
+        'sub_total' => $estimate2['sub_total'],
+        'discount' => $estimate2['discount'],
         'customer_id' => $estimate2['customer_id'],
+        'total' => $estimate2['total'],
+        'tax' => $estimate2['tax'],
         'exchange_rate' => $estimate2['exchange_rate'],
+        'base_discount_val' => $estimate2['base_discount_val'],
+        'base_sub_total' => $estimate2['base_sub_total'],
+        'base_total' => $estimate2['base_total'],
+        'base_tax' => $estimate2['base_tax'],
     ]);
 
     $this->assertDatabaseHas('estimate_items', [
         'estimate_id' => $estimate2['items'][0]['estimate_id'],
         'exchange_rate' => $estimate2['items'][0]['exchange_rate'],
-        'item_id' => $estimate2['items'][0]['item_id'],
+        'base_price' => $estimate2['items'][0]['base_price'],
+        'base_discount_val' => $estimate2['items'][0]['base_discount_val'],
+        'base_tax' => $estimate2['items'][0]['base_tax'],
+        'base_total' => $estimate2['items'][0]['base_total'],
     ]);
 
     $response->assertStatus(200);

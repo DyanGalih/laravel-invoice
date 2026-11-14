@@ -18,11 +18,6 @@ class CopyModuleController extends Controller
     {
         $this->authorize('manage modules');
 
-        $request->validate([
-            'module' => ['required', 'string', 'regex:/^[A-Za-z][A-Za-z0-9_-]{0,99}$/'],
-            'path' => ['required', 'string'],
-        ]);
-
         $response = ModuleInstaller::copyFiles($request->module, $request->path);
 
         return response()->json([

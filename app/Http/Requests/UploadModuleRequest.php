@@ -33,12 +33,7 @@ class UploadModuleRequest extends FormRequest
             'module' => [
                 'required',
                 'string',
-                'max:100',
-                'regex:/^[A-Za-z][A-Za-z0-9_-]{0,99}$/',
-            ],
-            'sha256' => [
-                'required',
-                'regex:/^[A-Fa-f0-9]{64}$/',
+                'max:100'
             ]
         ];
     }

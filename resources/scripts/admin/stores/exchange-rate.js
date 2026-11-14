@@ -71,10 +71,7 @@ export const useExchangeRateStore = (useWindow = false) => {
           axios
             .get(`/api/v1/exchange-rate-providers/${id}`)
             .then((response) => {
-              this.currentExchangeRate = {
-                key: '',
-                ...response.data.data,
-              }
+              this.currentExchangeRate = response.data.data
               this.currencyConverter = response.data.data.driver_config
               resolve(response)
             })

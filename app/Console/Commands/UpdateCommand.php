@@ -184,9 +184,7 @@ class UpdateCommand extends Command
         $this->info('Copying update files...');
 
         try {
-            if (! Updater::copyFiles($path)) {
-                return false;
-            }
+            Updater::copyFiles($path);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
 
@@ -201,9 +199,7 @@ class UpdateCommand extends Command
         $this->info('Deleting unused old files...');
 
         try {
-            if (! Updater::deleteFiles($files)) {
-                return false;
-            }
+            Updater::deleteFiles($files);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
 

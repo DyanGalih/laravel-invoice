@@ -8,8 +8,6 @@ return [
      */
     'disk_name' => env('MEDIA_DISK', 'public'),
 
-    'conversions_disk_name' => env('MEDIA_CONVERSIONS_DISK', null),
-
     /*
      * The maximum file size of an item in bytes.
      * Adding a larger file will result in an exception.
@@ -21,12 +19,6 @@ return [
      * Leave empty to use the default queue.
      */
     'queue_name' => '',
-
-    'queue_connection_name' => env('QUEUE_CONNECTION', 'sync'),
-
-    'queue_conversions_by_default' => env('QUEUE_CONVERSIONS_BY_DEFAULT', true),
-
-    'queue_conversions_after_database_commit' => env('QUEUE_CONVERSIONS_AFTER_DB_COMMIT', true),
 
     /*
      * The fully qualified class name of the media model.
@@ -86,9 +78,7 @@ return [
      * This is the class that is responsible for naming conversion files. By default,
      * it will use the filename of the original and concatenate the conversion name to it.
      */
-    'file_namer' => \Spatie\MediaLibrary\Support\FileNamer\DefaultFileNamer::class,
-
-    'file_remover_class' => \Spatie\MediaLibrary\Support\FileRemover\DefaultFileRemover::class,
+    'conversion_file_namer' => \Spatie\MediaLibrary\Conversions\DefaultConversionFileNamer::class,
 
     /*
      * The class that contains the strategy for determining a media file's path.

@@ -31,7 +31,7 @@ Route::get('/modules/scripts/{script}', ScriptController::class);
 // Admin Auth
 // ----------------------------------------------
 
-Route::post('login', [LoginController::class, 'login'])->middleware('throttle:auth-login');
+Route::post('login', [LoginController::class, 'login']);
 
 Route::post('auth/logout', function () {
     Auth::guard('web')->logout();
@@ -41,7 +41,7 @@ Route::post('auth/logout', function () {
 // Customer auth
 // ----------------------------------------------
 
-Route::post('/{company:slug}/customer/login', CustomerLoginController::class)->middleware('throttle:auth-login');
+Route::post('/{company:slug}/customer/login', CustomerLoginController::class);
 
 Route::post('/{company:slug}/customer/logout', function () {
     Auth::guard('customer')->logout();

@@ -53,9 +53,7 @@ class PaymentMethod extends Model
 
     public function scopeWherePaymentMethod($query, $payment_id)
     {
-        $query->where(function ($query) use ($payment_id) {
-            $query->where('payment_methods.id', $payment_id);
-        });
+        $query->orWhere('id', $payment_id);
     }
 
     public function scopeWhereSearch($query, $search)

@@ -5,7 +5,6 @@
 namespace Crater\Http\Controllers\V1\Admin\Backup;
 
 use Crater\Jobs\CreateBackupJob;
-use Crater\Models\FileDisk;
 use Crater\Rules\Backup\PathToZip;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,24 +24,12 @@ class BackupsController extends ApiController
     {
         $this->authorize('manage backups');
 
-        $request->validate([
-            'file_disk_id' => ['nullable', 'integer'],
-        ]);
-
-        $fileDisk = FileDisk::whereCompany()
-            ->when($request->file_disk_id, function ($query) use ($request) {
-                return $query->whereKey($request->file_disk_id);
-            }, function ($query) {
-                return $query->whereSetAsDefault(true);
-            })
-            ->firstOrFail();
-        $fileDisk->setConfig();
-        $configuredBackupDisks = [$fileDisk->driver];
+        $configuredBackupDisks = config('backup.backup.destination.disks');
 
         try {
             $backupDestination = BackupDestination::create(config('filesystems.default'), config('backup.backup.name'));
 
-            $backups = Cache::remember("backups-{$request->header('company')}-{$fileDisk->id}", now()->addSeconds(4), function () use ($backupDestination) {
+            $backups = Cache::remember("backups-{$request->file_disk_id}", now()->addSeconds(4), function () use ($backupDestination) {
                 return $backupDestination
                     ->backups()
                     ->map(function (Backup $backup) {
@@ -63,7 +50,7 @@ class BackupsController extends ApiController
             return response()->json([
                 'backups' => [],
                 'error' => 'invalid_disk_credentials',
-                'error_message' => 'The selected backup disk is unavailable.',
+                'error_message' => $e->getMessage(),
                 'disks' => $configuredBackupDisks,
             ]);
         }
@@ -79,16 +66,7 @@ class BackupsController extends ApiController
     {
         $this->authorize('manage backups');
 
-        $validated = $request->validate([
-            'file_disk_id' => ['required', 'integer'],
-            'option' => ['nullable', 'in:only-db,only-files,full'],
-        ]);
-        $fileDisk = FileDisk::whereCompany()->findOrFail($validated['file_disk_id']);
-
-        dispatch(new CreateBackupJob(array_merge($validated, [
-            'company_id' => $request->header('company'),
-            'file_disk_id' => $fileDisk->id,
-        ])))->onQueue(config('backup.queue.name'));
+        dispatch(new CreateBackupJob($request->all()))->onQueue(config('backup.queue.name'));
 
         return $this->respondSuccess();
     }
@@ -105,25 +83,16 @@ class BackupsController extends ApiController
 
         $validated = $request->validate([
             'path' => ['required', new PathToZip()],
-            'file_disk_id' => ['required', 'integer'],
         ]);
-
-        $fileDisk = FileDisk::whereCompany()->findOrFail($validated['file_disk_id']);
-        $fileDisk->setConfig();
 
         $backupDestination = BackupDestination::create(config('filesystems.default'), config('backup.backup.name'));
 
-        $backup = $backupDestination
+        $backupDestination
             ->backups()
             ->first(function (Backup $backup) use ($validated) {
                 return $backup->path() === $validated['path'];
-            });
-
-        if (! $backup) {
-            return response('Backup not found', 422);
-        }
-
-        $backup->delete();
+            })
+            ->delete();
 
         return $this->respondSuccess();
     }

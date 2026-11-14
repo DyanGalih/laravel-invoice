@@ -68,9 +68,7 @@ class EstimatesController extends Controller
     {
         $this->authorize('delete multiple estimates');
 
-        Estimate::where('company_id', $request->header('company'))
-            ->whereIn('id', $request->ids)
-            ->delete();
+        Estimate::destroy($request->ids);
 
         return response()->json([
             'success' => true,

@@ -20,7 +20,7 @@ class FileDiskResource extends JsonResource
             'type' => $this->type,
             'driver' => $this->driver,
             'set_as_default' => $this->set_as_default,
-            'credentials_configured' => ! empty($this->credentials),
+            'credentials' => $this->credentials,
             'company_id' => $this->company_id,
         ];
     }

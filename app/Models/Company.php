@@ -34,11 +34,7 @@ class Company extends Model implements HasMedia
     {
         $logo = $this->getMedia('logo')->first();
 
-        $isSystem = FileDisk::forCompany($this->id)
-            ->whereSetAsDefault(true)
-            ->first();
-
-        $isSystem = ! $isSystem || $isSystem->isSystem();
+        $isSystem = FileDisk::whereSetAsDefault(true)->first()->isSystem();
 
         if ($logo) {
             if ($isSystem) {

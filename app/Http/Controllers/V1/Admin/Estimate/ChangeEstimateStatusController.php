@@ -5,7 +5,6 @@ namespace Crater\Http\Controllers\V1\Admin\Estimate;
 use Crater\Http\Controllers\Controller;
 use Crater\Models\Estimate;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ChangeEstimateStatusController extends Controller
 {
@@ -20,20 +19,7 @@ class ChangeEstimateStatusController extends Controller
     {
         $this->authorize('send estimate', $estimate);
 
-        $validated = $request->validate([
-            'status' => [
-                'required',
-                Rule::in([
-                    Estimate::STATUS_SENT,
-                    Estimate::STATUS_ACCEPTED,
-                    Estimate::STATUS_REJECTED,
-                ]),
-            ],
-        ]);
-
-        if (! $estimate->transitionStatus($validated['status'])) {
-            return response()->json(['error' => 'invalid_estimate_status_transition'], 422);
-        }
+        $estimate->update($request->only('status'));
 
         return response()->json([
             'success' => true,

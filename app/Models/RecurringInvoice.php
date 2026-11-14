@@ -5,7 +5,6 @@ namespace Crater\Models;
 use Carbon\Carbon;
 use Crater\Http\Requests\RecurringInvoiceRequest;
 use Crater\Services\SerialNumberFormatter;
-use Crater\Traits\CalculatesDocumentTotals;
 use Crater\Traits\HasCustomFieldsTrait;
 use Cron;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +14,6 @@ use Vinkla\Hashids\Facades\Hashids;
 class RecurringInvoice extends Model
 {
     use HasFactory;
-    use CalculatesDocumentTotals;
     use HasCustomFieldsTrait;
 
     protected $guarded = [
@@ -188,17 +186,7 @@ class RecurringInvoice extends Model
 
     public static function createFromRequest(RecurringInvoiceRequest $request)
     {
-        $data = $request->getRecurringInvoicePayload();
-        $prepared = self::prepareDocument(
-            $request->header('company'),
-            $request->items,
-            $request->taxes,
-            $request->discount,
-            $request->discount_type,
-            $data['tax_per_item']
-        );
-        $data = array_merge($data, $prepared['attributes']);
-        $recurringInvoice = self::create($data);
+        $recurringInvoice = self::create($request->getRecurringInvoicePayload());
 
         $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
 
@@ -206,10 +194,10 @@ class RecurringInvoice extends Model
             ExchangeRateLog::addExchangeRateLog($recurringInvoice);
         }
 
-        self::createItems($recurringInvoice, $prepared['items']);
+        self::createItems($recurringInvoice, $request->items);
 
-        if (! empty($prepared['taxes'])) {
-            self::createTaxes($recurringInvoice, $prepared['taxes']);
+        if ($request->has('taxes') && (! empty($request->taxes))) {
+            self::createTaxes($recurringInvoice, $request->taxes);
         }
 
         if ($request->customFields) {
@@ -222,15 +210,6 @@ class RecurringInvoice extends Model
     public function updateFromRequest(RecurringInvoiceRequest $request)
     {
         $data = $request->getRecurringInvoicePayload();
-        $prepared = self::prepareDocument(
-            $this->company_id,
-            $request->items,
-            $request->taxes,
-            $request->discount,
-            $request->discount_type,
-            $data['tax_per_item']
-        );
-        $data = array_merge($data, $prepared['attributes']);
 
         $this->update($data);
 
@@ -241,11 +220,11 @@ class RecurringInvoice extends Model
         }
 
         $this->items()->delete();
-        self::createItems($this, $prepared['items']);
+        self::createItems($this, $request->items);
 
         $this->taxes()->delete();
-        if (! empty($prepared['taxes'])) {
-            self::createTaxes($this, $prepared['taxes']);
+        if ($request->has('taxes') && (! empty($request->taxes))) {
+            self::createTaxes($this, $request->taxes);
         }
 
         if ($request->customFields) {
@@ -258,22 +237,15 @@ class RecurringInvoice extends Model
     public static function createItems($recurringInvoice, $invoiceItems)
     {
         foreach ($invoiceItems as $invoiceItem) {
-            $customFields = $invoiceItem['custom_fields'] ?? [];
-            $taxes = $invoiceItem['taxes'] ?? [];
-            unset($invoiceItem['custom_fields'], $invoiceItem['taxes']);
             $invoiceItem['company_id'] = $recurringInvoice->company_id;
             $item = $recurringInvoice->items()->create($invoiceItem);
-            if ($taxes) {
-                foreach ($taxes as $tax) {
+            if (array_key_exists('taxes', $invoiceItem) && $invoiceItem['taxes']) {
+                foreach ($invoiceItem['taxes'] as $tax) {
                     $tax['company_id'] = $recurringInvoice->company_id;
                     if (gettype($tax['amount']) !== "NULL") {
                         $item->taxes()->create($tax);
                     }
                 }
-            }
-
-            if ($customFields) {
-                $item->addCustomFields($customFields);
             }
         }
     }
@@ -341,7 +313,7 @@ class RecurringInvoice extends Model
 
         $newInvoice['creator_id'] = $this->creator_id;
         $newInvoice['invoice_date'] = Carbon::today()->format('Y-m-d');
-        $newInvoice['due_date'] = Carbon::today()->addDays((int) $days)->format('Y-m-d');
+        $newInvoice['due_date'] = Carbon::today()->addDays($days)->format('Y-m-d');
         $newInvoice['status'] = Invoice::STATUS_DRAFT;
         $newInvoice['company_id'] = $this->company_id;
         $newInvoice['paid_status'] = Invoice::STATUS_UNPAID;

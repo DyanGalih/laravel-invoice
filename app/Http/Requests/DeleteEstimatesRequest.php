@@ -27,14 +27,10 @@ class DeleteEstimatesRequest extends FormRequest
         return [
             'ids' => [
                 'required',
-                'array',
-                'min:1',
             ],
             'ids.*' => [
                 'required',
-                'integer',
-                Rule::exists('estimates', 'id')
-                    ->where('company_id', $this->header('company')),
+                Rule::exists('estimates', 'id'),
             ],
         ];
     }

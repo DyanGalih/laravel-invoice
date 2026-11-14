@@ -24,14 +24,10 @@ class DownloadUpdateController extends Controller
         }
 
         $request->validate([
-            'version' => ['required', 'string', 'regex:/^[A-Za-z0-9][A-Za-z0-9._-]{0,49}$/'],
+            'version' => 'required',
         ]);
 
         $path = Updater::download($request->version);
-
-        if (! is_string($path)) {
-            return response()->json($path, 422);
-        }
 
         return response()->json([
             'success' => true,

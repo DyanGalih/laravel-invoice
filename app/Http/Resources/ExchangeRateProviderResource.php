@@ -16,7 +16,7 @@ class ExchangeRateProviderResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'key_configured' => ! empty($this->key),
+            'key' => $this->key,
             'driver' => $this->driver,
             'currencies' => $this->currencies,
             'driver_config' => $this->driver_config,

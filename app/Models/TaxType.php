@@ -38,9 +38,7 @@ class TaxType extends Model
 
     public function scopeWhereTaxType($query, $tax_type_id)
     {
-        $query->where(function ($query) use ($tax_type_id) {
-            $query->where('tax_types.id', $tax_type_id);
-        });
+        $query->orWhere('id', $tax_type_id);
     }
 
     public function scopeApplyFilters($query, array $filters)

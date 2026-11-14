@@ -16,10 +16,6 @@ class PaymentPdfController extends Controller
      */
     public function __invoke(Request $request, Payment $payment)
     {
-        if (! $request->user() || ! $request->user()->hasCompany($payment->company_id)) {
-            abort(404);
-        }
-
         if ($request->has('preview')) {
             return view('app.pdf.payment.payment');
         }

@@ -84,7 +84,7 @@ test('delete tax type', function () {
             'success' => true,
         ]);
 
-    $this->assertModelMissing($taxType);
+    $this->assertDeleted($taxType);
 });
 
 

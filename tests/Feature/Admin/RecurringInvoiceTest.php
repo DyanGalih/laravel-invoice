@@ -8,7 +8,6 @@ use Crater\Models\RecurringInvoice;
 use Crater\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
-
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
@@ -112,7 +111,7 @@ test('delete multiple recurring invoice', function () {
         ]);
 
     foreach ($recurringInvoices as $recurringInvoice) {
-        $this->assertModelMissing($recurringInvoice);
+        $this->assertDeleted($recurringInvoice);
     }
 });
 

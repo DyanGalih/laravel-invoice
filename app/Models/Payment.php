@@ -2,7 +2,7 @@
 
 namespace Crater\Models;
 
-use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Crater\Jobs\GeneratePaymentPdfJob;
 use Crater\Mail\SendPaymentMail;
@@ -63,14 +63,14 @@ class Payment extends Model implements HasMedia
 
     public function getFormattedCreatedAtAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y/m/d';
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
     public function getFormattedPaymentDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y/m/d';
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
         return Carbon::parse($this->payment_date)->format($dateFormat);
     }
@@ -238,23 +238,13 @@ class Payment extends Model implements HasMedia
         return $payment;
     }
 
-    public static function deletePayments($ids, $companyId = null)
+    public static function deletePayments($ids)
     {
-        $companyId = $companyId ?: request()->header('company');
-
         foreach ($ids as $id) {
-            $payment = Payment::where('company_id', $companyId)->find($id);
-
-            if (! $payment) {
-                continue;
-            }
+            $payment = Payment::find($id);
 
             if ($payment->invoice_id != null) {
-                $invoice = Invoice::where('company_id', $companyId)->find($payment->invoice_id);
-
-                if (! $invoice) {
-                    continue;
-                }
+                $invoice = Invoice::find($payment->invoice_id);
                 $invoice->due_amount = ((int)$invoice->due_amount + (int)$payment->amount);
 
                 if ($invoice->due_amount == $invoice->total) {
@@ -355,9 +345,7 @@ class Payment extends Model implements HasMedia
 
     public function scopeWherePayment($query, $payment_id)
     {
-        $query->where(function ($query) use ($payment_id) {
-            $query->where('payments.id', $payment_id);
-        });
+        $query->orWhere('id', $payment_id);
     }
 
     public function scopeWhereCompany($query)

@@ -266,11 +266,6 @@ class EnvironmentManager
 
     private function getMailData($request)
     {
-        $mailUsername = $request->mail_username ?: config('mail.username');
-        $mailPassword = $request->mail_password ?: config('mail.password');
-        $mailgunSecret = $request->mail_mailgun_secret ?: config('services.mailgun.secret');
-        $sesKey = $request->mail_ses_key ?: config('services.ses.key');
-        $sesSecret = $request->mail_ses_secret ?: config('services.ses.secret');
         $mailFromCredential = "";
         $extraMailData = "";
         $extraOldMailData = "";
@@ -287,7 +282,7 @@ class EnvironmentManager
             case 'smtp':
 
                 $oldMailData =
-                    'MAIL_MAILER='.config('mail.default')."\n".
+                    'MAIL_DRIVER='.config('mail.driver')."\n".
                     'MAIL_HOST='.config('mail.host')."\n".
                     'MAIL_PORT='.config('mail.port')."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -296,11 +291,11 @@ class EnvironmentManager
                     $mailFromCredential;
 
                 $newMailData =
-                    'MAIL_MAILER='.$request->mail_driver."\n".
+                    'MAIL_DRIVER='.$request->mail_driver."\n".
                     'MAIL_HOST='.$request->mail_host."\n".
                     'MAIL_PORT='.$request->mail_port."\n".
-                    'MAIL_USERNAME='.$mailUsername."\n".
-                    'MAIL_PASSWORD='.$mailPassword."\n".
+                    'MAIL_USERNAME='.$request->mail_username."\n".
+                    'MAIL_PASSWORD='.$request->mail_password."\n".
                     'MAIL_ENCRYPTION='.$request->mail_encryption."\n\n".
                     'MAIL_FROM_ADDRESS='.$request->from_mail."\n".
                     'MAIL_FROM_NAME="'.$request->from_name."\"\n\n";
@@ -309,7 +304,7 @@ class EnvironmentManager
 
             case 'mailgun':
                 $oldMailData =
-                    'MAIL_MAILER='.config('mail.default')."\n".
+                    'MAIL_DRIVER='.config('mail.driver')."\n".
                     'MAIL_HOST='.config('mail.host')."\n".
                     'MAIL_PORT='.config('mail.port')."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -318,7 +313,7 @@ class EnvironmentManager
                     $mailFromCredential;
 
                 $newMailData =
-                    'MAIL_MAILER='.$request->mail_driver."\n".
+                    'MAIL_DRIVER='.$request->mail_driver."\n".
                     'MAIL_HOST='.$request->mail_host."\n".
                     'MAIL_PORT='.$request->mail_port."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -329,7 +324,7 @@ class EnvironmentManager
 
                 $extraMailData =
                     'MAILGUN_DOMAIN='.$request->mail_mailgun_domain."\n".
-                    'MAILGUN_SECRET='.$mailgunSecret."\n".
+                    'MAILGUN_SECRET='.$request->mail_mailgun_secret."\n".
                     'MAILGUN_ENDPOINT='.$request->mail_mailgun_endpoint."\n";
 
                 if (env('MAILGUN_DOMAIN') !== null && env('MAILGUN_SECRET') !== null && env('MAILGUN_ENDPOINT') !== null) {
@@ -343,7 +338,7 @@ class EnvironmentManager
 
             case 'ses':
                 $oldMailData =
-                    'MAIL_MAILER='.config('mail.default')."\n".
+                    'MAIL_DRIVER='.config('mail.driver')."\n".
                     'MAIL_HOST='.config('mail.host')."\n".
                     'MAIL_PORT='.config('mail.port')."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -352,7 +347,7 @@ class EnvironmentManager
                     $mailFromCredential;
 
                 $newMailData =
-                    'MAIL_MAILER='.$request->mail_driver."\n".
+                    'MAIL_DRIVER='.$request->mail_driver."\n".
                     'MAIL_HOST='.$request->mail_host."\n".
                     'MAIL_PORT='.$request->mail_port."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -362,8 +357,8 @@ class EnvironmentManager
                     'MAIL_FROM_NAME="'.$request->from_name."\"\n\n";
 
                 $extraMailData =
-                    'SES_KEY='.$sesKey."\n".
-                    'SES_SECRET='.$sesSecret."\n";
+                    'SES_KEY='.$request->mail_ses_key."\n".
+                    'SES_SECRET='.$request->mail_ses_secret."\n";
 
                 if (env('SES_KEY') !== null && env('SES_SECRET') !== null) {
                     $extraOldMailData =
@@ -375,7 +370,7 @@ class EnvironmentManager
 
             case 'mail':
                 $oldMailData =
-                    'MAIL_MAILER='.config('mail.default')."\n".
+                    'MAIL_DRIVER='.config('mail.driver')."\n".
                     'MAIL_HOST='.config('mail.host')."\n".
                     'MAIL_PORT='.config('mail.port')."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -384,7 +379,7 @@ class EnvironmentManager
                     $mailFromCredential;
 
                 $newMailData =
-                    'MAIL_MAILER='.$request->mail_driver."\n".
+                    'MAIL_DRIVER='.$request->mail_driver."\n".
                     'MAIL_HOST='.config('mail.host')."\n".
                     'MAIL_PORT='.config('mail.port')."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -397,7 +392,7 @@ class EnvironmentManager
 
             case 'sendmail':
                 $oldMailData =
-                    'MAIL_MAILER='.config('mail.default')."\n".
+                    'MAIL_DRIVER='.config('mail.driver')."\n".
                     'MAIL_HOST='.config('mail.host')."\n".
                     'MAIL_PORT='.config('mail.port')."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -406,7 +401,7 @@ class EnvironmentManager
                     $mailFromCredential;
 
                 $newMailData =
-                    'MAIL_MAILER='.$request->mail_driver."\n".
+                    'MAIL_DRIVER='.$request->mail_driver."\n".
                     'MAIL_HOST='.config('mail.host')."\n".
                     'MAIL_PORT='.config('mail.port')."\n".
                     'MAIL_USERNAME='.config('mail.username')."\n".
@@ -523,7 +518,7 @@ class EnvironmentManager
                     'DO_SPACES_REGION='.$request->do_spaces_region."\n".
                     'DO_SPACES_BUCKET='.$request->do_spaces_bucket."\n".
                     'DO_SPACES_ENDPOINT='.$request->do_spaces_endpoint."\n";
-                'DO_SPACES_ROOT='.$request->do_spaces_root."\n\n";
+                    'DO_SPACES_ROOT='.$request->do_spaces_root."\n\n";
 
                 break;
 

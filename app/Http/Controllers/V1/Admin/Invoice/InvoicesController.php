@@ -102,7 +102,7 @@ class InvoicesController extends Controller
     {
         $this->authorize('delete multiple invoices');
 
-        Invoice::deleteInvoices($request->ids, $request->header('company'));
+        Invoice::deleteInvoices($request->ids);
 
         return response()->json([
             'success' => true,

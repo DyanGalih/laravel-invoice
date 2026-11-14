@@ -18,7 +18,7 @@ class RolePolicy
      */
     public function viewAny(User $user)
     {
-        if ($user->isOwner() && $user->hasCompany(request()->header('company'))) {
+        if ($user->isOwner()) {
             return true;
         }
 
@@ -34,7 +34,7 @@ class RolePolicy
      */
     public function view(User $user, Role $role)
     {
-        if ($user->isOwner() && $user->hasCompany($role->scope) && (string) $role->scope === (string) request()->header('company')) {
+        if ($user->isOwner()) {
             return true;
         }
 
@@ -49,7 +49,7 @@ class RolePolicy
      */
     public function create(User $user)
     {
-        if ($user->isOwner() && $user->hasCompany(request()->header('company'))) {
+        if ($user->isOwner()) {
             return true;
         }
 
@@ -65,7 +65,7 @@ class RolePolicy
      */
     public function update(User $user, Role $role)
     {
-        if ($user->isOwner() && $user->hasCompany($role->scope) && (string) $role->scope === (string) request()->header('company')) {
+        if ($user->isOwner()) {
             return true;
         }
 
@@ -81,7 +81,7 @@ class RolePolicy
      */
     public function delete(User $user, Role $role)
     {
-        if ($user->isOwner() && $user->hasCompany($role->scope) && (string) $role->scope === (string) request()->header('company')) {
+        if ($user->isOwner()) {
             return true;
         }
 
@@ -97,7 +97,7 @@ class RolePolicy
      */
     public function restore(User $user, Role $role)
     {
-        if ($user->isOwner() && $user->hasCompany($role->scope) && (string) $role->scope === (string) request()->header('company')) {
+        if ($user->isOwner()) {
             return true;
         }
 
@@ -113,7 +113,7 @@ class RolePolicy
      */
     public function forceDelete(User $user, Role $role)
     {
-        if ($user->isOwner() && $user->hasCompany($role->scope) && (string) $role->scope === (string) request()->header('company')) {
+        if ($user->isOwner()) {
             return true;
         }
 

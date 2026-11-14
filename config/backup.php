@@ -41,8 +41,6 @@ return [
                  * Determines if it should avoid unreadable folders.
                  */
                 'ignore_unreadable_directories' => false,
-
-                'relative_path' => null,
             ],
 
             /*
@@ -76,7 +74,7 @@ return [
              * For a complete list of available customization options, see https://github.com/spatie/db-dumper
              */
             'databases' => [
-                env('DB_CONNECTION', 'mysql'),
+                'mysql',
             ],
         ],
 
@@ -124,12 +122,12 @@ return [
     'notifications' => [
 
         'notifications' => [
-            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\BackupHasFailed::class => [],
+            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFound::class => [],
+            \Spatie\Backup\Notifications\Notifications\CleanupHasFailed::class => [],
+            \Spatie\Backup\Notifications\Notifications\BackupWasSuccessful::class => [],
+            \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFound::class => [],
+            \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessful::class => [],
         ],
 
         /*
@@ -234,9 +232,6 @@ return [
              */
             'delete_oldest_backups_when_using_more_megabytes_than' => 5000,
         ],
-
-        'tries' => 1,
-        'retry_delay' => 0,
     ],
 
     'queue' => [

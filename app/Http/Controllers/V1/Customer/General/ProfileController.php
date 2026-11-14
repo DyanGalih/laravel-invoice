@@ -14,12 +14,8 @@ class ProfileController extends Controller
     public function updateProfile(Company $company, CustomerProfileRequest $request)
     {
         $customer = Auth::guard('customer')->user();
-        $passwordChanged = $request->filled('password');
 
         $customer->update($request->validated());
-        if ($passwordChanged) {
-            $customer->tokens()->delete();
-        }
 
         if (isset($request->is_customer_avatar_removed) && (bool) $request->is_customer_avatar_removed) {
             $customer->clearMediaCollection('customer_avatar');

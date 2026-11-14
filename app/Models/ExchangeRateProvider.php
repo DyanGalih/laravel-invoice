@@ -6,7 +6,6 @@ use Crater\Http\Requests\ExchangeRateProviderRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
-use RuntimeException;
 
 class ExchangeRateProvider extends Model
 {
@@ -39,7 +38,7 @@ class ExchangeRateProvider extends Model
 
     public function scopeWhereCompany($query)
     {
-        return $query->where('exchange_rate_providers.company_id', request()->header('company'));
+        $query->where('exchange_rate_providers.company_id', request()->header('company'));
     }
 
     public static function createFromRequest(ExchangeRateProviderRequest $request)
@@ -58,8 +57,7 @@ class ExchangeRateProvider extends Model
 
     public static function checkActiveCurrencies($request)
     {
-        $query = ExchangeRateProvider::whereCompany()
-            ->whereJsonContains('currencies', $request->currencies)
+        $query = ExchangeRateProvider::whereJsonContains('currencies', $request->currencies)
             ->where('active', true)
             ->get();
 
@@ -68,8 +66,7 @@ class ExchangeRateProvider extends Model
 
     public function checkUpdateActiveCurrencies($request)
     {
-        $query = ExchangeRateProvider::whereCompany()
-            ->where('active', $request->active)
+        $query = ExchangeRateProvider::where('active', $request->active)
             ->where('id', '<>', $this->id)
             ->whereJsonContains('currencies', $request->currencies)
             ->get();
@@ -97,7 +94,7 @@ class ExchangeRateProvider extends Model
                 break;
 
             case 'currency_layer':
-                $url = "https://api.currencylayer.com/live?access_key=".$request['key']."&source=INR&currencies=USD";
+                $url = "http://api.currencylayer.com/live?access_key=".$request['key']."&source=INR&currencies=USD";
                 $response = Http::get($url)->json();
 
                 if (array_key_exists('success', $response)) {
@@ -113,10 +110,8 @@ class ExchangeRateProvider extends Model
                 break;
 
             case 'open_exchange_rate':
-                $url = 'https://openexchangerates.org/api/latest.json?base=INR&symbols=USD';
-                $response = Http::withHeaders([
-                    'Authorization' => 'Token '.$request['key'],
-                ])->get($url)->json();
+                $url = "https://openexchangerates.org/api/latest.json?app_id=".$request['key']."&base=INR&symbols=USD";
+                $response = Http::get($url)->json();
 
                 if (array_key_exists("error", $response)) {
                     return respondJson($response['message'], $response["description"]);
@@ -163,12 +158,7 @@ class ExchangeRateProvider extends Model
                 break;
 
             case 'DEDICATED':
-                $url = rtrim((string) ($data['url'] ?? ''), '/');
-                if (parse_url($url, PHP_URL_SCHEME) !== 'https') {
-                    throw new RuntimeException('Dedicated exchange-rate endpoint must use HTTPS.');
-                }
-
-                return $url;
+                return $data['url'];
 
                 break;
         }

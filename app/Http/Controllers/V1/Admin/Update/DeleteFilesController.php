@@ -23,15 +23,8 @@ class DeleteFilesController extends Controller
             ], 401);
         }
 
-        $request->validate([
-            'deleted_files' => ['nullable', 'string'],
-        ]);
-
-        if ($request->filled('deleted_files') && ! Updater::deleteFiles($request->deleted_files)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Invalid update file list.',
-            ], 422);
+        if (isset($request->deleted_files) && ! empty($request->deleted_files)) {
+            Updater::deleteFiles($request->deleted_files);
         }
 
         return response()->json([

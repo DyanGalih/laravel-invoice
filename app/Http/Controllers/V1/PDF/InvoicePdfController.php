@@ -16,10 +16,6 @@ class InvoicePdfController extends Controller
      */
     public function __invoke(Request $request, Invoice $invoice)
     {
-        if (! $request->user() || ! $request->user()->hasCompany($invoice->company_id)) {
-            abort(404);
-        }
-
         if ($request->has('preview')) {
             return $invoice->getPDFData();
         }

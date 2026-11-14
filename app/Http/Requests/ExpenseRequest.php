@@ -4,7 +4,6 @@ namespace Crater\Http\Requests;
 
 use Crater\Models\CompanySetting;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ExpenseRequest extends FormRequest
 {
@@ -30,40 +29,27 @@ class ExpenseRequest extends FormRequest
         $rules = [
             'expense_date' => [
                 'required',
-                'date',
             ],
             'expense_category_id' => [
                 'required',
-                'integer',
-                Rule::exists('expense_categories', 'id')->where('company_id', $this->header('company')),
             ],
             'exchange_rate' => [
-                'nullable',
-                'numeric',
-                'gt:0',
+                'nullable'
             ],
             'payment_method_id' => [
                 'nullable',
-                'integer',
-                Rule::exists('payment_methods', 'id')->where('company_id', $this->header('company')),
             ],
             'amount' => [
                 'required',
-                'integer',
-                'min:0',
             ],
             'customer_id' => [
                 'nullable',
-                'integer',
-                Rule::exists('customers', 'id')->where('company_id', $this->header('company')),
             ],
             'notes' => [
                 'nullable',
             ],
             'currency_id' => [
-                'required',
-                'integer',
-                Rule::exists('currencies', 'id'),
+                'required'
             ],
             'attachment_receipt' => [
                 'nullable',
@@ -77,8 +63,6 @@ class ExpenseRequest extends FormRequest
             if ($companyCurrency !== $this->currency_id) {
                 $rules['exchange_rate'] = [
                     'required',
-                    'numeric',
-                    'gt:0',
                 ];
             };
         }
@@ -93,7 +77,6 @@ class ExpenseRequest extends FormRequest
         $exchange_rate = $company_currency != $current_currency ? $this->exchange_rate : 1;
 
         return collect($this->validated())
-            ->only(['expense_date', 'expense_category_id', 'payment_method_id', 'amount', 'customer_id', 'notes', 'currency_id'])
             ->merge([
                 'creator_id' => $this->user()->id,
                 'company_id' => $this->header('company'),

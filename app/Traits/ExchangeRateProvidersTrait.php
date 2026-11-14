@@ -3,7 +3,6 @@
 namespace Crater\Traits;
 
 use Illuminate\Support\Facades\Http;
-use RuntimeException;
 
 trait ExchangeRateProvidersTrait
 {
@@ -29,7 +28,7 @@ trait ExchangeRateProvidersTrait
                 break;
 
             case 'currency_layer':
-                $url = "https://api.currencylayer.com/live?access_key=".$filter['key']."&source={$baseCurrencyCode}&currencies={$currencyCode}";
+                $url = "http://api.currencylayer.com/live?access_key=".$filter['key']."&source={$baseCurrencyCode}&currencies={$currencyCode}";
                 $response = Http::get($url)->json();
 
                 if (array_key_exists('success', $response)) {
@@ -45,10 +44,8 @@ trait ExchangeRateProvidersTrait
                 break;
 
             case 'open_exchange_rate':
-                $url = "https://openexchangerates.org/api/latest.json?base={$baseCurrencyCode}&symbols={$currencyCode}";
-                $response = Http::withHeaders([
-                    'Authorization' => 'Token '.$filter['key'],
-                ])->get($url)->json();
+                $url = "https://openexchangerates.org/api/latest.json?app_id=".$filter['key']."&base={$baseCurrencyCode}&symbols={$currencyCode}";
+                $response = Http::get($url)->json();
 
                 if (array_key_exists("error", $response)) {
                     return respondJson($response["message"], $response["description"]);
@@ -95,12 +92,7 @@ trait ExchangeRateProvidersTrait
                 break;
 
             case 'DEDICATED':
-                $url = rtrim((string) ($data['url'] ?? ''), '/');
-                if (parse_url($url, PHP_URL_SCHEME) !== 'https') {
-                    throw new RuntimeException('Dedicated exchange-rate endpoint must use HTTPS.');
-                }
-
-                return $url;
+                return $data['url'];
 
                 break;
         }
@@ -135,7 +127,7 @@ trait ExchangeRateProvidersTrait
                 break;
 
             case 'currency_layer':
-                $url = "https://api.currencylayer.com/list?access_key=".$request->key;
+                $url = "http://api.currencylayer.com/list?access_key=".$request->key;
                 $response = Http::get($url)->json();
 
                 if ($response == null) {
@@ -197,18 +189,16 @@ trait ExchangeRateProvidersTrait
                 break;
 
             case 'currency_layer':
-                $url = "https://api.currencylayer.com/live?access_key=".$request->key."&source=INR&currencies=USD";
+                $url = "http://api.currencylayer.com/live?access_key=".$request->key."&source=INR&currencies=USD";
 
                 return Http::get($url)->json();
 
                 break;
 
             case 'open_exchange_rate':
-                $url = 'https://openexchangerates.org/api/latest.json?base=INR&symbols=USD';
+                $url = "https://openexchangerates.org/api/latest.json?app_id=".$request->key."&base=INR&symbols=USD";
 
-                return Http::withHeaders([
-                    'Authorization' => 'Token '.$request->key,
-                ])->get($url)->json();
+                return Http::get($url)->json();
 
                 break;
 

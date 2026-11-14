@@ -21,13 +21,11 @@ class RolesController extends Controller
     {
         $this->authorize('viewAny', Role::class);
 
-        $roles = Role::where('scope', $request->header('company'))
-            ->when($request->has('orderByField'), function ($query) use ($request) {
-                $allowed = ['name', 'title', 'level', 'created_at'];
-                $field = in_array($request->orderByField, $allowed, true) ? $request->orderByField : 'name';
-                $direction = strtolower((string) $request->orderBy) === 'desc' ? 'desc' : 'asc';
-
-                return $query->orderBy($field, $direction);
+        $roles = Role::when($request->has('orderByField'), function ($query) use ($request) {
+            return $query->orderBy($request['orderByField'], $request['orderBy']);
+        })
+            ->when($request->company_id, function ($query) use ($request) {
+                return $query->where('scope', $request->company_id);
             })
             ->get();
 
@@ -59,7 +57,6 @@ class RolesController extends Controller
      */
     public function show(Role $role)
     {
-        $role = Role::where('scope', request()->header('company'))->findOrFail($role->id);
         $this->authorize('view', $role);
 
         return new RoleResource($role);
@@ -74,7 +71,6 @@ class RolesController extends Controller
      */
     public function update(RoleRequest $request, Role $role)
     {
-        $role = Role::where('scope', $request->header('company'))->findOrFail($role->id);
         $this->authorize('update', $role);
 
         $role->update($request->getRolePayload());
@@ -92,12 +88,9 @@ class RolesController extends Controller
      */
     public function destroy(Role $role)
     {
-        $role = Role::where('scope', request()->header('company'))->findOrFail($role->id);
         $this->authorize('delete', $role);
 
-        $users = User::whereHas('companies', function ($query) use ($role) {
-            $query->where('companies.id', $role->scope);
-        })->whereIs($role->name)->get()->toArray();
+        $users = User::whereIs($role->name)->get()->toArray();
 
         if (! empty($users)) {
             return respondJson('role_attached_to_users', 'Roles Attached to user');

@@ -28,9 +28,7 @@ class Unit extends Model
 
     public function scopeWhereUnit($query, $unit_id)
     {
-        $query->where(function ($query) use ($unit_id) {
-            $query->where('units.id', $unit_id);
-        });
+        $query->orWhere('id', $unit_id);
     }
 
     public function scopeWhereSearch($query, $search)

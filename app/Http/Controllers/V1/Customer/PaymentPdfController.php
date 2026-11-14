@@ -12,20 +12,16 @@ class PaymentPdfController extends Controller
 {
     public function getPdf(EmailLog $emailLog, Request $request)
     {
-        $payment = $emailLog->validMailable(Payment::class);
-        if (! $payment) {
-            abort(403, 'Link Expired.');
+        if (! $emailLog->isExpired()) {
+            return $emailLog->mailable->getGeneratedPDFOrStream('payment');
         }
 
-        return $payment->getGeneratedPDFOrStream('payment');
+        abort(403, 'Link Expired.');
     }
 
     public function getPayment(EmailLog $emailLog)
     {
-        $payment = $emailLog->validMailable(Payment::class);
-        if (! $payment) {
-            abort(403, 'Link Expired.');
-        }
+        $payment = Payment::find($emailLog->mailable_id);
 
         return new PaymentResource($payment);
     }

@@ -33,12 +33,8 @@ class CompanyController extends Controller
     public function updateProfile(ProfileRequest $request)
     {
         $user = $request->user();
-        $passwordChanged = $request->filled('password');
 
         $user->update($request->validated());
-        if ($passwordChanged) {
-            $user->tokens()->delete();
-        }
 
         return new UserResource($user);
     }

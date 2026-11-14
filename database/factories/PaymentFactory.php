@@ -9,7 +9,6 @@ use Crater\Models\PaymentMethod;
 use Crater\Models\User;
 use Crater\Services\SerialNumberFormatter;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class PaymentFactory extends Factory
 {
@@ -40,7 +39,7 @@ class PaymentFactory extends Factory
             'sequence_number' => $sequenceNumber->nextSequenceNumber,
             'customer_sequence_number' => $sequenceNumber->nextCustomerSequenceNumber,
             'payment_number' => $sequenceNumber->getNextNumber(),
-            'unique_hash' => Str::random(60),
+            'unique_hash' => str_random(60),
             'payment_method_id' => PaymentMethod::find(1)->id,
             'customer_id' => Customer::factory(),
             'base_amount' => $this->faker->randomDigitNotNull,

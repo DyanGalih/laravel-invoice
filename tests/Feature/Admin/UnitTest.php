@@ -6,7 +6,6 @@ use Crater\Models\Unit;
 use Crater\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
-
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
@@ -98,5 +97,5 @@ test('delete unit', function () {
 
     $response->assertOk();
 
-    $this->assertModelMissing($unit);
+    $this->assertDeleted($unit);
 });

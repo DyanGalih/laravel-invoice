@@ -24,7 +24,7 @@ class UnzipUpdateController extends Controller
         }
 
         $request->validate([
-            'path' => ['required', 'string'],
+            'path' => 'required',
         ]);
 
         try {

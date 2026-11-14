@@ -3,7 +3,6 @@
 use Crater\Models\Company;
 use Crater\Models\CompanySetting;
 use Illuminate\Support\Facades\Artisan;
-
 use function Pest\Faker\faker;
 
 beforeEach(function () {

@@ -9,7 +9,6 @@ use Crater\Models\RecurringInvoice;
 use Crater\Models\User;
 use Crater\Services\SerialNumberFormatter;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class InvoiceFactory extends Factory
 {
@@ -113,7 +112,7 @@ class InvoiceFactory extends Factory
                 return $invoice['total'];
             },
             'notes' => $this->faker->text(80),
-            'unique_hash' => Str::random(60),
+            'unique_hash' => str_random(60),
             'customer_id' => Customer::factory(),
             'recurring_invoice_id' => RecurringInvoice::factory(),
             'exchange_rate' => $this->faker->randomDigitNotNull,

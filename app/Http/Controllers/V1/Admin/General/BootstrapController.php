@@ -27,11 +27,7 @@ class BootstrapController extends Controller
     public function __invoke(Request $request)
     {
         $current_user = $request->user();
-        $current_user_settings = $current_user->getSettings([
-            'language',
-            'default_invoice_template',
-            'default_estimate_template',
-        ]);
+        $current_user_settings = $current_user->getAllSettings();
 
         $main_menu = $this->generateMenu('main_menu', $current_user);
 
@@ -54,6 +50,7 @@ class BootstrapController extends Controller
         BouncerFacade::refreshFor($current_user);
 
         $global_settings = Setting::getSettings([
+            'api_token',
             'admin_portal_theme',
             'admin_portal_logo',
             'login_page_logo',

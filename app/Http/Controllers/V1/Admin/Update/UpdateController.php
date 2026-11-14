@@ -14,14 +14,10 @@ class UpdateController extends Controller
         $this->authorize('manage update app');
 
         $request->validate([
-            'version' => ['required', 'string', 'regex:/^[A-Za-z0-9][A-Za-z0-9._-]{0,49}$/'],
+            'version' => 'required',
         ]);
 
         $path = Updater::download($request->version);
-
-        if (! is_string($path)) {
-            return response()->json($path, 422);
-        }
 
         return response()->json([
             'success' => true,
@@ -34,7 +30,7 @@ class UpdateController extends Controller
         $this->authorize('manage update app');
 
         $request->validate([
-            'path' => ['required', 'string'],
+            'path' => 'required',
         ]);
 
         try {
@@ -57,17 +53,10 @@ class UpdateController extends Controller
         $this->authorize('manage update app');
 
         $request->validate([
-            'path' => ['required', 'string'],
+            'path' => 'required',
         ]);
 
         $path = Updater::copyFiles($request->path);
-
-        if ($path !== true) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Unable to copy verified update files.',
-            ], 422);
-        }
 
         return response()->json([
             'success' => true,
