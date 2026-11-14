@@ -99,17 +99,7 @@ class Updater
 
         $temp_extract_dir = storage_path('app/extract-'.Str::uuid()->toString());
 
-        if (! File::isDirectory($temp_extract_dir)) {
-            File::makeDirectory($temp_extract_dir);
-        }
-        // Unzip the file
-        $zip = new ZipArchive();
-
-        if ($zip->open($zip_file_path)) {
-            $zip->extractTo($temp_extract_dir);
-        }
-
-        $zip->close();
+        static::safeExtractArchive($zip_file_path, $temp_extract_dir);
 
         // Delete zip file
         File::delete($zip_file_path);
@@ -119,7 +109,17 @@ class Updater
 
     public static function copyFiles($temp_extract_dir)
     {
-        if (! File::copyDirectory($temp_extract_dir.'/Crater', base_path())) {
+        $realExtract = realpath($temp_extract_dir);
+        if (! $realExtract || ! is_dir($realExtract)) {
+            throw new \RuntimeException('Extraction directory not found.');
+        }
+
+        $targetDir = realpath(base_path());
+        if (! $targetDir) {
+            throw new \RuntimeException('Unable to resolve base application directory.');
+        }
+
+        if (! File::copyDirectory($temp_extract_dir.'/Crater', $targetDir)) {
             return false;
         }
 
@@ -132,9 +132,14 @@ class Updater
     public static function deleteFiles($json)
     {
         $files = json_decode($json);
+        $baseDir = realpath(base_path());
 
         foreach ($files as $file) {
-            \File::delete(base_path($file));
+            $relativePath = static::safeRelativePath($file);
+            $target = realpath(base_path($relativePath));
+            if ($target && static::isWithin($target, $baseDir)) {
+                \File::delete($target);
+            }
         }
 
         return true;
