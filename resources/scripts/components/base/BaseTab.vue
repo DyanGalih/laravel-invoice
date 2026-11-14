@@ -1,6 +1,5 @@
 <template>
   <TabPanel :class="[tabPanelContainer, 'focus:outline-none']">
-    <!-- focus:ring-1 focus:ring-jet focus:ring-opacity-60 -->
     <slot />
   </TabPanel>
 </template>

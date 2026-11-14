@@ -1,6 +1,5 @@
 import axios from 'axios'
 import moment from 'moment'
-import Guid from 'guid'
 import _ from 'lodash'
 import { defineStore } from 'pinia'
 import { useRoute } from 'vue-router'
@@ -14,13 +13,13 @@ import estimateStub from '../stub/estimate'
 import estimateItemStub from '../stub/estimate-item'
 import taxStub from '../stub/tax'
 import { useUserStore } from './user'
+import createUuid from '@/scripts/helpers/uuid'
 
 export const useEstimateStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
   const { global } = window.i18n
 
-  return defineStoreFunc({
-    id: 'estimate',
+  return defineStoreFunc('estimate', {
 
     state: () => ({
       templates: [],
@@ -147,7 +146,7 @@ export const useEstimateStore = (useWindow = false) => {
               resolve(response)
             })
             .catch((err) => {
-              console.log(err);
+              console.log(err)
               handleError(err)
               reject(err)
             })
@@ -157,7 +156,9 @@ export const useEstimateStore = (useWindow = false) => {
       addSalesTaxUs() {
         const taxTypeStore = useTaxTypeStore()
         let salesTax = { ...taxStub }
-        let found = this.newEstimate.taxes.find((_t) => _t.name === 'Sales Tax' && _t.type === 'MODULE')
+        let found = this.newEstimate.taxes.find(
+          (_t) => _t.name === 'Sales Tax' && _t.type === 'MODULE',
+        )
         if (found) {
           for (const key in found) {
             if (Object.prototype.hasOwnProperty.call(salesTax, key)) {
@@ -165,10 +166,10 @@ export const useEstimateStore = (useWindow = false) => {
             }
           }
           salesTax.id = found.tax_type_id
-          console.log(salesTax, 'salesTax');
+          console.log(salesTax, 'salesTax')
 
           taxTypeStore.taxTypes.push(salesTax)
-          console.log(taxTypeStore.taxTypes);
+          console.log(taxTypeStore.taxTypes)
         }
       },
 
@@ -224,7 +225,7 @@ export const useEstimateStore = (useWindow = false) => {
             .post(`/api/v1/estimates/delete`, id)
             .then((response) => {
               let index = this.estimates.findIndex(
-                (estimate) => estimate.id === id
+                (estimate) => estimate.id === id,
               )
 
               this.estimates.splice(index, 1)
@@ -251,7 +252,7 @@ export const useEstimateStore = (useWindow = false) => {
             .then((response) => {
               this.selectedEstimates.forEach((estimate) => {
                 let index = this.estimates.findIndex(
-                  (_est) => _est.id === estimate.id
+                  (_est) => _est.id === estimate.id,
                 )
                 this.estimates.splice(index, 1)
               })
@@ -259,7 +260,7 @@ export const useEstimateStore = (useWindow = false) => {
 
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('estimates.deleted_message', 2),
+                message: global.t('estimates.deleted_message', 2),
               })
               resolve(response)
             })
@@ -276,7 +277,7 @@ export const useEstimateStore = (useWindow = false) => {
             .put(`/api/v1/estimates/${data.id}`, data)
             .then((response) => {
               let pos = this.estimates.findIndex(
-                (estimate) => estimate.id === response.data.data.id
+                (estimate) => estimate.id === response.data.data.id,
               )
               this.estimates[pos] = response.data.data
               const notificationStore = useNotificationStore()
@@ -299,7 +300,7 @@ export const useEstimateStore = (useWindow = false) => {
             .post(`/api/v1/estimates/${data.id}/status`, data)
             .then((response) => {
               let pos = this.estimates.findIndex(
-                (estimate) => estimate.id === data.id
+                (estimate) => estimate.id === data.id,
               )
               if (this.estimates[pos]) {
                 this.estimates[pos].status = 'ACCEPTED'
@@ -346,7 +347,7 @@ export const useEstimateStore = (useWindow = false) => {
             .post(`/api/v1/estimates/${data.id}/status`, data)
             .then((response) => {
               let pos = this.estimates.findIndex(
-                (estimate) => estimate.id === data.id
+                (estimate) => estimate.id === data.id,
               )
               if (this.estimates[pos]) {
                 this.estimates[pos].status = 'SENT'
@@ -471,8 +472,8 @@ export const useEstimateStore = (useWindow = false) => {
       addItem() {
         this.newEstimate.items.push({
           ...estimateItemStub,
-          id: Guid.raw(),
-          taxes: [{ ...taxStub, id: Guid.raw() }],
+          id: createUuid(),
+          taxes: [{ ...taxStub, id: createUuid() }],
         })
       },
 
@@ -487,8 +488,8 @@ export const useEstimateStore = (useWindow = false) => {
       deselectItem(index) {
         this.newEstimate.items[index] = {
           ...estimateItemStub,
-          id: Guid.raw(),
-          taxes: [{ ...taxStub, id: Guid.raw() }],
+          id: createUuid(),
+          taxes: [{ ...taxStub, id: createUuid() }],
         }
       },
 
@@ -514,14 +515,22 @@ export const useEstimateStore = (useWindow = false) => {
         if (!isEdit) {
           this.newEstimate.tax_per_item =
             companyStore.selectedCompanySettings.tax_per_item
-          this.newEstimate.sales_tax_type = companyStore.selectedCompanySettings.sales_tax_type
-          this.newEstimate.sales_tax_address_type = companyStore.selectedCompanySettings.sales_tax_address_type
+          this.newEstimate.sales_tax_type =
+            companyStore.selectedCompanySettings.sales_tax_type
+          this.newEstimate.sales_tax_address_type =
+            companyStore.selectedCompanySettings.sales_tax_address_type
           this.newEstimate.discount_per_item =
             companyStore.selectedCompanySettings.discount_per_item
           this.newEstimate.estimate_date = moment().format('YYYY-MM-DD')
-          if (companyStore.selectedCompanySettings.estimate_set_expiry_date_automatically === 'YES') {
+          if (
+            companyStore.selectedCompanySettings
+              .estimate_set_expiry_date_automatically === 'YES'
+          ) {
             this.newEstimate.expiry_date = moment()
-              .add(companyStore.selectedCompanySettings.estimate_expiry_date_days, 'days')
+              .add(
+                companyStore.selectedCompanySettings.estimate_expiry_date_days,
+                'days',
+              )
               .format('YYYY-MM-DD')
           }
         } else {
@@ -548,9 +557,10 @@ export const useEstimateStore = (useWindow = false) => {
               }
 
               this.setTemplate(this.templates[0].name)
-              this.newEstimate.template_name =
-                userStore.currentUserSettings.default_estimate_template ?
-                userStore.currentUserSettings.default_estimate_template : this.newEstimate.template_name
+              this.newEstimate.template_name = userStore.currentUserSettings
+                .default_estimate_template
+                ? userStore.currentUserSettings.default_estimate_template
+                : this.newEstimate.template_name
             }
 
             if (isEdit) {

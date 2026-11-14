@@ -27,6 +27,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import createUuid from '@/scripts/helpers/uuid'
 
 const props = defineProps({
   label: {
@@ -43,7 +44,7 @@ const props = defineProps({
   },
   id: {
     type: [Number, String],
-    default: () => `check_${Math.random().toString(36).substr(2, 9)}`,
+    default: () => `check_${createUuid()}`,
   },
   disabled: {
     type: Boolean,

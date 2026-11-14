@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { XCircleIcon } from '@heroicons/vue/solid'
+import { XCircleIcon } from '@heroicons/vue/24/solid'
 
 const emits = defineEmits(['hide'])
 const props = defineProps({

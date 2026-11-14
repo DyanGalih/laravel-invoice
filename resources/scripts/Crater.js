@@ -6,8 +6,7 @@ import router from '@/scripts/router/index'
 import { defineGlobalComponents } from './global-components'
 import utils from '@/scripts/helpers/utilities.js'
 import _ from 'lodash'
-import Maska from 'maska'
-import { VTooltip } from 'v-tooltip'
+import { vTooltip } from 'floating-vue'
 
 const app = createApp(App)
 
@@ -50,11 +49,10 @@ export default class Crater {
     const { createPinia } = window.pinia
 
     app.use(router)
-    app.use(Maska)
     app.use(i18n)
     app.use(createPinia())
     app.provide('utils', utils)
-    app.directive('tooltip', VTooltip)
+    app.directive('tooltip', vTooltip)
 
     app.mount('body')
   }

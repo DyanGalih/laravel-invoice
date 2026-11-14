@@ -5,8 +5,7 @@ import stubs from '@/scripts/customer/stubs/address'
 import axios from 'axios'
 import { useGlobalStore } from '@/scripts/customer/stores/global'
 
-export const useUserStore = defineStore({
-  id: 'customerUserStore',
+export const useUserStore = defineStore('customerUserStore', {
 
   state: () => ({
     customers: [],

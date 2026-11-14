@@ -4,8 +4,7 @@ export const useModalStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
   const { global } = window.i18n
 
-  return defineStoreFunc({
-    id: 'modal',
+  return defineStoreFunc('modal', {
 
     state: () => ({
       active: false,

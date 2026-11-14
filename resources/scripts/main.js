@@ -1,5 +1,5 @@
 import '../sass/crater.scss'
-import 'v-tooltip/dist/v-tooltip.css'
+import 'floating-vue/dist/style.css'
 import '@/scripts/plugins/axios.js'
 import * as VueRouter from 'vue-router'
 import router from '@/scripts/router/index'

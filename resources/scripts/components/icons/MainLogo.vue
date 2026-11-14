@@ -148,11 +148,11 @@
 defineProps({
   darkColor: {
     type: String,
-    default: 'rgba(var(--color-primary-500), var(--tw-text-opacity))',
+    default: 'rgba(var(--color-primary-500), 1)',
   },
   lightColor: {
     type: String,
-    default: 'rgba(var(--color-primary-400), var(--tw-text-opacity))',
+    default: 'rgba(var(--color-primary-400), 1)',
   },
 })
 </script>

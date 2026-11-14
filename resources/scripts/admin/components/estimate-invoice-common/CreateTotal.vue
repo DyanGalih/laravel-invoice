@@ -1,16 +1,6 @@
 <template>
   <div
-    class="
-      px-5
-      py-4
-      mt-6
-      bg-white
-      border border-gray-200 border-solid
-      rounded
-      md:min-w-[390px]
-      min-w-[300px]
-      lg:mt-7
-    "
+    class="px-5 py-4 mt-6 bg-white border border-gray-200 border-solid rounded md:min-w-[390px] min-w-[300px] lg:mt-7"
   >
     <div class="flex items-center justify-between w-full">
       <BaseContentPlaceholders v-if="isLoading">
@@ -29,7 +19,7 @@
 
       <label
         v-else
-        class="flex items-center justify-center m-0 text-lg text-black uppercase "
+        class="flex items-center justify-center m-0 text-lg text-black uppercase"
       >
         <BaseFormatMoney
           :amount="store.getSubTotal"
@@ -59,7 +49,7 @@
 
       <label
         v-else-if="store[storeProp].tax_per_item === 'YES'"
-        class="flex items-center justify-center m-0 text-lg text-black uppercase "
+        class="flex items-center justify-center m-0 text-lg text-black uppercase"
       >
         <BaseFormatMoney :amount="tax.amount" :currency="defaultCurrency" />
       </label>
@@ -90,12 +80,7 @@
       <div v-else class="flex" style="width: 140px" role="group">
         <BaseInput
           v-model="totalDiscount"
-          class="
-            border-r-0
-            focus:border-r-2
-            rounded-tr-sm rounded-br-sm
-            h-[38px]
-          "
+          class="border-r-0 focus:border-r-2 rounded-tr-sm rounded-br-sm h-[38px]"
         />
         <BaseDropdown position="bottom-end">
           <template #activator>
@@ -166,7 +151,7 @@
     </div>
 
     <div
-      class="flex items-center justify-between w-full pt-2 mt-5 border-t border-gray-200 border-solid "
+      class="flex items-center justify-between w-full pt-2 mt-5 border-t border-gray-200 border-solid"
     >
       <BaseContentPlaceholders v-if="isLoading">
         <BaseContentPlaceholdersText :lines="1" class="w-16 h-5" />
@@ -182,7 +167,7 @@
       </BaseContentPlaceholders>
       <label
         v-else
-        class="flex items-center justify-center text-lg uppercase  text-primary-400"
+        class="flex items-center justify-center text-lg uppercase text-primary-400"
       >
         <BaseFormatMoney :amount="store.getTotal" :currency="defaultCurrency" />
       </label>
@@ -192,11 +177,11 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue'
-import Guid from 'guid'
 import Tax from './CreateTotalTaxes.vue'
 import TaxStub from '@/scripts/admin/stub/abilities'
 import SelectTaxPopup from './SelectTaxPopup.vue'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import createUuid from '@/scripts/helpers/uuid'
 
 const taxModal = ref(null)
 
@@ -234,7 +219,7 @@ const totalDiscount = computed({
   set: (newValue) => {
     if (props.store[props.storeProp].discount_type === 'percentage') {
       props.store[props.storeProp].discount_val = Math.round(
-        (props.store.getSubTotal * newValue) / 100
+        (props.store.getSubTotal * newValue) / 100,
       )
     } else {
       props.store[props.storeProp].discount_val = Math.round(newValue * 100)
@@ -289,7 +274,7 @@ function selectFixed() {
     return
   }
   props.store[props.storeProp].discount_val = Math.round(
-    props.store[props.storeProp].discount * 100
+    props.store[props.storeProp].discount * 100,
   )
   props.store[props.storeProp].discount_type = 'fixed'
 }
@@ -310,17 +295,17 @@ function onSelectTax(selectedTax) {
     amount = Math.round(
       ((props.store.getSubtotalWithDiscount + props.store.getTotalSimpleTax) *
         selectedTax.percent) /
-        100
+        100,
     )
   } else if (props.store.getSubtotalWithDiscount && selectedTax.percent) {
     amount = Math.round(
-      (props.store.getSubtotalWithDiscount * selectedTax.percent) / 100
+      (props.store.getSubtotalWithDiscount * selectedTax.percent) / 100,
     )
   }
 
   let data = {
     ...TaxStub,
-    id: Guid.raw(),
+    id: createUuid(),
     name: selectedTax.name,
     percent: selectedTax.percent,
     compound_tax: selectedTax.compound_tax,
@@ -334,7 +319,7 @@ function onSelectTax(selectedTax) {
 
 function updateTax(data) {
   const tax = props.store[props.storeProp].taxes.find(
-    (tax) => tax.id === data.id
+    (tax) => tax.id === data.id,
   )
   if (tax) {
     Object.assign(tax, { ...data })
@@ -343,7 +328,7 @@ function updateTax(data) {
 
 function removeTax(id) {
   const index = props.store[props.storeProp].taxes.findIndex(
-    (tax) => tax.id === id
+    (tax) => tax.id === id,
   )
 
   props.store.$patch((state) => {

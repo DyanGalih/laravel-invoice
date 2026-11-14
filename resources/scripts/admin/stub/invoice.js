@@ -1,6 +1,6 @@
-import Guid from 'guid'
 import invoiceItemStub from './invoice-item'
 import taxStub from './tax'
+import createUuid from '@/scripts/helpers/uuid'
 
 export default function () {
   return {
@@ -27,8 +27,8 @@ export default function () {
     items: [
       {
         ...invoiceItemStub,
-        id: Guid.raw(),
-        taxes: [{ ...taxStub, id: Guid.raw() }],
+        id: createUuid(),
+        taxes: [{ ...taxStub, id: createUuid() }],
       },
     ],
     customFields: [],

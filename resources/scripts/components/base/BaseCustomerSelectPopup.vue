@@ -173,7 +173,7 @@
     <Popover v-else v-slot="{ open }" class="relative flex flex-col rounded-md">
       <PopoverButton
         :class="{
-          'text-opacity-90': open,
+          'text-current/90': open,
           'border border-solid border-red-500 focus:ring-red-500 rounded':
             valid.$error,
           'focus:ring-2 focus:ring-primary-400': !valid.$error,
@@ -244,7 +244,7 @@
               overflow-hidden
               rounded-md
               shadow-lg
-              ring-1 ring-black ring-opacity-5
+              ring-1 ring-black/5
               bg-white
             "
           >

@@ -9,8 +9,7 @@ export const useExpenseStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
   const { global } = window.i18n
 
-  return defineStoreFunc({
-    id: 'expense',
+  return defineStoreFunc('expense', {
 
     state: () => ({
       expenses: [],
@@ -185,7 +184,7 @@ export const useExpenseStore = (useWindow = false) => {
 
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('expenses.deleted_message', 1),
+                message: global.t('expenses.deleted_message', 1),
               })
               resolve(response)
             })
@@ -211,7 +210,7 @@ export const useExpenseStore = (useWindow = false) => {
               })
               notificationStore.showNotification({
                 type: 'success',
-                message: global.tc('expenses.deleted_message', 2),
+                message: global.t('expenses.deleted_message', 2),
               })
               resolve(response)
             })

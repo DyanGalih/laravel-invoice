@@ -1,6 +1,6 @@
-import Guid from 'guid'
 import recurringInvoiceItemStub from './recurring-invoice-item'
 import taxStub from './tax'
+import createUuid from '@/scripts/helpers/uuid'
 
 export default function () {
   return {
@@ -33,8 +33,8 @@ export default function () {
     items: [
       {
         ...recurringInvoiceItemStub,
-        id: Guid.raw(),
-        taxes: [{ ...taxStub, id: Guid.raw() }],
+        id: createUuid(),
+        taxes: [{ ...taxStub, id: createUuid() }],
       },
     ],
     taxes: [],

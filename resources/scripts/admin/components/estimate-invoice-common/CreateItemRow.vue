@@ -17,7 +17,7 @@
             <td class="px-5 py-4 text-left align-top">
               <div class="flex justify-start">
                 <div
-                  class="flex items-center justify-center w-5 h-5 mt-2 mr-2 text-gray-300 cursor-move  handle"
+                  class="flex items-center justify-center w-5 h-5 mt-2 mr-2 text-gray-300 cursor-move handle"
                 >
                   <DragIcon />
                 </div>
@@ -73,12 +73,7 @@
                     v-model="discount"
                     :invalid="v$.discount_val.$error"
                     :content-loading="loading"
-                    class="
-                      border-r-0
-                      focus:border-r-2
-                      rounded-tr-sm rounded-br-sm
-                      h-[38px]
-                    "
+                    class="border-r-0 focus:border-r-2 rounded-tr-sm rounded-br-sm h-[38px]"
                   />
                   <BaseDropdown position="bottom-end">
                     <template #activator>
@@ -179,7 +174,6 @@
 import { computed, ref, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import Guid from 'guid'
 import TaxStub from '@/scripts/admin/stub/tax'
 import ItemTax from './CreateItemRowTax.vue'
 import { sumBy } from 'lodash'
@@ -195,6 +189,7 @@ import useVuelidate from '@vuelidate/core'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import DragIcon from '@/scripts/components/icons/DragIcon.vue'
+import createUuid from '@/scripts/helpers/uuid'
 
 const props = defineProps({
   store: {
@@ -317,7 +312,7 @@ const totalSimpleTax = computed(() => {
         return tax.amount
       }
       return 0
-    })
+    }),
   )
 })
 
@@ -328,7 +323,7 @@ const totalCompoundTax = computed(() => {
         return tax.amount
       }
       return 0
-    })
+    }),
   )
 })
 
@@ -342,22 +337,22 @@ const rules = {
     required: helpers.withMessage(t('validation.required'), required),
     minValue: helpers.withMessage(
       t('validation.qty_must_greater_than_zero'),
-      minValue(0)
+      minValue(0),
     ),
     maxLength: helpers.withMessage(
       t('validation.amount_maxlength'),
-      maxLength(20)
+      maxLength(20),
     ),
   },
   price: {
     required: helpers.withMessage(t('validation.required'), required),
     minValue: helpers.withMessage(
       t('validation.number_length_minvalue'),
-      minValue(1)
+      minValue(1),
     ),
     maxLength: helpers.withMessage(
       t('validation.price_maxlength'),
-      maxLength(20)
+      maxLength(20),
     ),
   },
   discount_val: {
@@ -365,14 +360,14 @@ const rules = {
       t('validation.discount_maxlength'),
       between(
         0,
-        computed(() => subtotal.value)
-      )
+        computed(() => subtotal.value),
+      ),
     ),
   },
   description: {
     maxLength: helpers.withMessage(
       t('validation.notes_maxlength'),
-      maxLength(65000)
+      maxLength(65000),
     ),
   },
 }
@@ -380,22 +375,8 @@ const rules = {
 const v$ = useVuelidate(
   rules,
   computed(() => props.store[props.storeProp].items[props.index]),
-  { $scope: props.itemValidationScope }
+  { $scope: props.itemValidationScope },
 )
-
-//
-// if (
-//   route.params.id &&
-//   (props.store[props.storeProp].tax_per_item === 'YES' || 'NO')
-// ) {
-//   if (props.store[props.storeProp].items[props.index].taxes === undefined) {
-//     props.store.$patch((state) => {
-//       state[props.storeProp].items[props.index].taxes = [
-//         { ...TaxStub, id: Guid.raw() },
-//       ]
-//     })
-//   }
-// }
 
 function updateTax(data) {
   props.store.$patch((state) => {
@@ -408,7 +389,7 @@ function updateTax(data) {
     props.store.$patch((state) => {
       state[props.storeProp].items[props.index].taxes.push({
         ...TaxStub,
-        id: Guid.raw(),
+        id: createUuid(),
       })
     })
   }
@@ -466,7 +447,7 @@ function selectPercentage() {
 
   updateItemAttribute(
     'discount_val',
-    (subtotal.value * props.itemData.discount) / 100
+    (subtotal.value * props.itemData.discount) / 100,
   )
 
   updateItemAttribute('discount_type', 'percentage')
