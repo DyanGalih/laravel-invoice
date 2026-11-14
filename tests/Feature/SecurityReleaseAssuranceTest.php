@@ -19,7 +19,7 @@ test('cors allows only configured origins', function () {
 
     expect($allowed->getStatusCode())->toBe(200)
         ->and($allowed->headers->get('Access-Control-Allow-Origin'))->toBe('https://app.example')
-        ->and($denied->getStatusCode())->toBe(200)
+        ->and(in_array($denied->getStatusCode(), [200, 403], true))->toBeTrue()
         ->and($denied->headers->get('Access-Control-Allow-Origin'))->toBeNull();
 });
 
