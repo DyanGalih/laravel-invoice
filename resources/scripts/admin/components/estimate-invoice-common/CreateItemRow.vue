@@ -189,6 +189,7 @@ import useVuelidate from '@vuelidate/core'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import DragIcon from '@/scripts/components/icons/DragIcon.vue'
+import createUuid from '@/scripts/helpers/uuid'
 
 const props = defineProps({
   store: {
@@ -388,7 +389,7 @@ function updateTax(data) {
     props.store.$patch((state) => {
       state[props.storeProp].items[props.index].taxes.push({
         ...TaxStub,
-        id: crypto.randomUUID(),
+        id: createUuid(),
       })
     })
   }

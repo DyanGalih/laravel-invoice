@@ -181,6 +181,7 @@ import Tax from './CreateTotalTaxes.vue'
 import TaxStub from '@/scripts/admin/stub/abilities'
 import SelectTaxPopup from './SelectTaxPopup.vue'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
+import createUuid from '@/scripts/helpers/uuid'
 
 const taxModal = ref(null)
 
@@ -304,7 +305,7 @@ function onSelectTax(selectedTax) {
 
   let data = {
     ...TaxStub,
-    id: crypto.randomUUID(),
+    id: createUuid(),
     name: selectedTax.name,
     percent: selectedTax.percent,
     compound_tax: selectedTax.compound_tax,

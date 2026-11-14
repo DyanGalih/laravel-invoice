@@ -13,6 +13,7 @@ import moment from 'moment'
 import _ from 'lodash'
 import { useInvoiceStore } from './invoice'
 import { useNotificationStore } from '@/scripts/stores/notification'
+import createUuid from '@/scripts/helpers/uuid'
 
 export const useRecurringInvoiceStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
@@ -112,8 +113,8 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       deselectItem(index) {
         this.newRecurringInvoice.items[index] = {
           ...recurringInvoiceItemStub,
-          id: crypto.randomUUID(),
-          taxes: [{ ...TaxStub, id: crypto.randomUUID() }],
+          id: createUuid(),
+          taxes: [{ ...TaxStub, id: createUuid() }],
         }
       },
 
@@ -318,8 +319,8 @@ export const useRecurringInvoiceStore = (useWindow = false) => {
       addItem() {
         this.newRecurringInvoice.items.push({
           ...recurringInvoiceItemStub,
-          id: crypto.randomUUID(),
-          taxes: [{ ...TaxStub, id: crypto.randomUUID() }],
+          id: createUuid(),
+          taxes: [{ ...TaxStub, id: createUuid() }],
         })
       },
 

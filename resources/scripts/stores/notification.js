@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import createUuid from '@/scripts/helpers/uuid'
 
 export const useNotificationStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
@@ -15,7 +16,7 @@ export const useNotificationStore = (useWindow = false) => {
       showNotification(notification) {
         this.notifications.push({
           ...notification,
-          id: crypto.randomUUID(),
+          id: createUuid(),
         })
       },
 

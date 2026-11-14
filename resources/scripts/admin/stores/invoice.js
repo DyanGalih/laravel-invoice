@@ -14,6 +14,7 @@ import { useTaxTypeStore } from './tax-type'
 import { useCompanyStore } from './company'
 import { useItemStore } from './item'
 import { useUserStore } from './user'
+import createUuid from '@/scripts/helpers/uuid'
 
 export const useInvoiceStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
@@ -414,8 +415,8 @@ export const useInvoiceStore = (useWindow = false) => {
       addItem() {
         this.newInvoice.items.push({
           ...invoiceItemStub,
-          id: crypto.randomUUID(),
-          taxes: [{ ...taxStub, id: crypto.randomUUID() }],
+          id: createUuid(),
+          taxes: [{ ...taxStub, id: createUuid() }],
         })
       },
 
@@ -430,8 +431,8 @@ export const useInvoiceStore = (useWindow = false) => {
       deselectItem(index) {
         this.newInvoice.items[index] = {
           ...invoiceItemStub,
-          id: crypto.randomUUID(),
-          taxes: [{ ...taxStub, id: crypto.randomUUID() }],
+          id: createUuid(),
+          taxes: [{ ...taxStub, id: createUuid() }],
         }
       },
 

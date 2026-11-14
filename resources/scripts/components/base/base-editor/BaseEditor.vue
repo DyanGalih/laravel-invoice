@@ -354,7 +354,9 @@ export default {
           return
         }
 
-        editor.value.commands.setContent(props.modelValue, false)
+        editor.value.commands.setContent(props.modelValue, {
+          emitUpdate: false,
+        })
       },
     )
 

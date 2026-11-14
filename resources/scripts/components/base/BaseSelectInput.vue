@@ -86,7 +86,7 @@
             rounded-md
             shadow-lg
             max-h-60
-            ring-1 ring-black ring-opacity-5
+            ring-1 ring-black/5
             focus:outline-none
             sm:text-sm
           "

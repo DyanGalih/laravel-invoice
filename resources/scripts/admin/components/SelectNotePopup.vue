@@ -4,13 +4,16 @@
     <Popover v-slot="{ isOpen }">
       <PopoverButton
         v-if="userStore.hasAbilities(abilities.VIEW_NOTE)"
-        :class="isOpen ? '' : 'text-opacity-90'"
+        :class="
+          isOpen
+            ? 'text-primary-400'
+            : 'text-[rgba(var(--color-primary-400),0.9)]'
+        "
         class="
           flex
           items-center
           z-10
           font-medium
-          text-primary-400
           focus:outline-none focus:border-none
         "
         @click="fetchInitialData"
@@ -50,7 +53,7 @@
               overflow-hidden
               rounded-md
               shadow-lg
-              ring-1 ring-black ring-opacity-5
+              ring-1 ring-black/5
             "
           >
             <div class="relative grid bg-white">

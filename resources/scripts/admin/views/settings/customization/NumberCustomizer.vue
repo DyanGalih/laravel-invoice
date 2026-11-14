@@ -159,6 +159,7 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useGlobalStore } from '@/scripts/admin/stores/global'
 
 import DragIcon from '@/scripts/components/icons/DragIcon.vue'
+import createUuid from '@/scripts/helpers/uuid'
 
 const props = defineProps({
   type: {
@@ -309,7 +310,7 @@ async function setInitialFields() {
 
     const value = placeholder.value ?? ''
 
-    selectedFields.value.push({ ...found, value, id: crypto.randomUUID() })
+    selectedFields.value.push({ ...found, value, id: createUuid() })
   })
 
   isLoadingPlaceholders.value = false
@@ -326,7 +327,7 @@ function onSelectField(field) {
     return
   }
 
-  selectedFields.value.push({ ...field, id: crypto.randomUUID() })
+  selectedFields.value.push({ ...field, id: createUuid() })
 
   fetchNextNumber()
 }

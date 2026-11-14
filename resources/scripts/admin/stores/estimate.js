@@ -13,6 +13,7 @@ import estimateStub from '../stub/estimate'
 import estimateItemStub from '../stub/estimate-item'
 import taxStub from '../stub/tax'
 import { useUserStore } from './user'
+import createUuid from '@/scripts/helpers/uuid'
 
 export const useEstimateStore = (useWindow = false) => {
   const defineStoreFunc = useWindow ? window.pinia.defineStore : defineStore
@@ -471,8 +472,8 @@ export const useEstimateStore = (useWindow = false) => {
       addItem() {
         this.newEstimate.items.push({
           ...estimateItemStub,
-          id: crypto.randomUUID(),
-          taxes: [{ ...taxStub, id: crypto.randomUUID() }],
+          id: createUuid(),
+          taxes: [{ ...taxStub, id: createUuid() }],
         })
       },
 
@@ -487,8 +488,8 @@ export const useEstimateStore = (useWindow = false) => {
       deselectItem(index) {
         this.newEstimate.items[index] = {
           ...estimateItemStub,
-          id: crypto.randomUUID(),
-          taxes: [{ ...taxStub, id: crypto.randomUUID() }],
+          id: createUuid(),
+          taxes: [{ ...taxStub, id: createUuid() }],
         }
       },
 

@@ -135,6 +135,7 @@ import {
   helpers,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
+import createUuid from '@/scripts/helpers/uuid'
 
 const taxTypeStore = useTaxTypeStore()
 const modalStore = useModalStore()
@@ -212,7 +213,7 @@ function SelectTax(taxData) {
   }
   let data = {
     ...TaxStub,
-    id: crypto.randomUUID(),
+    id: createUuid(),
     name: taxData.name,
     percent: taxData.percent,
     compound_tax: taxData.compound_tax,
@@ -228,7 +229,7 @@ function selectItemTax(taxData) {
   if (modalStore.data) {
     let data = {
       ...TaxStub,
-      id: crypto.randomUUID(),
+      id: createUuid(),
       name: taxData.name,
       percent: taxData.percent,
       compound_tax: taxData.compound_tax,

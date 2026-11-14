@@ -2,7 +2,7 @@ const colors = require('tailwindcss/colors')
 const svgToDataUri = require('mini-svg-data-uri')
 
 function withOpacityValue(cssVariable) {
-  return `rgb(var(${cssVariable}) / <alpha-value>)`
+  return `rgba(var(${cssVariable}), <alpha-value>)`
 }
 
 module.exports = {
