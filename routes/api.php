@@ -180,7 +180,7 @@ Route::prefix('/v1')->group(function () {
 
         Route::put('/set-domain', AppDomainController::class);
 
-        Route::post('/login', LoginController::class);
+        Route::post('/login', LoginController::class)->middleware('throttle:auth-login');
 
         Route::post('/finish', FinishController::class);
     });
