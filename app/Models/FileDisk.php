@@ -30,6 +30,22 @@ class FileDisk extends Model
         $query->orderBy($orderByField, $orderBy);
     }
 
+    public function scopeForCompany($query, $companyId)
+    {
+        return $query->where(function ($query) use ($companyId) {
+            $query->where('company_id', $companyId)
+                ->orWhere(function ($query) {
+                    $query->whereNull('company_id')
+                        ->where('type', self::DISK_TYPE_SYSTEM);
+                });
+        });
+    }
+
+    public function scopeWhereCompany($query)
+    {
+        return $query->forCompany(request()->header('company'));
+    }
+
     public function scopeFileDisksBetween($query, $start, $end)
     {
         return $query->whereBetween(
@@ -41,8 +57,10 @@ class FileDisk extends Model
     public function scopeWhereSearch($query, $search)
     {
         foreach (explode(' ', $search) as $term) {
-            $query->where('name', 'LIKE', '%'.$term.'%')
-                ->orWhere('driver', 'LIKE', '%'.$term.'%');
+            $query->where(function ($query) use ($term) {
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('driver', 'LIKE', '%'.$term.'%');
+            });
         }
     }
 
@@ -132,8 +150,13 @@ class FileDisk extends Model
         return $exists;
     }
 
-    public static function createDisk($request)
+    public static function createDisk($request, $companyId = null)
     {
+        $companyId = $companyId ?: $request->header('company') ?: request()->header('company');
+        if (! $companyId && auth()->check()) {
+            $companyId = auth()->user()->companies()->firstOrFail()->id;
+        }
+
         if ($request->set_as_default) {
             self::updateDefaultDisks();
         }
@@ -141,17 +164,20 @@ class FileDisk extends Model
         $disk = self::create([
             'credentials' => $request->credentials,
             'name' => $request->name,
+            'type' => self::DISK_TYPE_REMOTE,
             'driver' => $request->driver,
             'set_as_default' => $request->set_as_default,
-            'company_id' => $request->header('company'),
+            'company_id' => $companyId,
         ]);
+        $disk->company_id = $companyId;
+        $disk->save();
 
         return $disk;
     }
 
-    public static function updateDefaultDisks()
+    public static function updateDefaultDisks($companyId = null)
     {
-        $disks = self::get();
+        $disks = self::forCompany($companyId ?: request()->header('company'))->get();
 
         foreach ($disks as $disk) {
             $disk->set_as_default = false;

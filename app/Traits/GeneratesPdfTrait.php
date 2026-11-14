@@ -38,7 +38,8 @@ trait GeneratesPdfTrait
             $media = $this->getMedia($collection_name)->first();
 
             if ($media) {
-                $file_disk = FileDisk::find($media->custom_properties['file_disk_id']);
+                $file_disk = FileDisk::forCompany($this->company_id)
+                    ->find($media->custom_properties['file_disk_id']);
 
                 if (! $file_disk) {
                     return false;
@@ -86,7 +87,9 @@ trait GeneratesPdfTrait
             $this->clearMediaCollection($this->id);
         }
 
-        $file_disk = FileDisk::whereSetAsDefault(true)->first();
+        $file_disk = FileDisk::forCompany($this->company_id)
+            ->whereSetAsDefault(true)
+            ->first();
 
         if ($file_disk) {
             $file_disk->setConfig();

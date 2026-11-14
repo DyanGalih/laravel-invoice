@@ -27,10 +27,14 @@ class DeleteCustomersRequest extends FormRequest
         return [
             'ids' => [
                 'required',
+                'array',
+                'min:1',
             ],
             'ids.*' => [
                 'required',
-                Rule::exists('customers', 'id'),
+                'integer',
+                Rule::exists('customers', 'id')
+                    ->where('company_id', $this->header('company')),
             ],
         ];
     }

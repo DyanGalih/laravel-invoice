@@ -4,6 +4,7 @@
 
 namespace Crater\Http\Controllers\V1\Admin\Backup;
 
+use Crater\Models\FileDisk;
 use Crater\Rules\Backup\PathToZip;
 use Illuminate\Http\Request;
 use Spatie\Backup\BackupDestination\Backup;
@@ -19,7 +20,11 @@ class DownloadBackupController extends ApiController
 
         $validated = $request->validate([
             'path' => ['required', new PathToZip()],
+            'file_disk_id' => ['required', 'integer'],
         ]);
+
+        $fileDisk = FileDisk::whereCompany()->findOrFail($validated['file_disk_id']);
+        $fileDisk->setConfig();
 
         $backupDestination = BackupDestination::create(config('filesystems.default'), config('backup.backup.name'));
 

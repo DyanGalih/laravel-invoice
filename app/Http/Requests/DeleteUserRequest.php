@@ -27,10 +27,14 @@ class DeleteUserRequest extends FormRequest
         return [
             'users' => [
                 'required',
+                'array',
+                'min:1',
             ],
             'users.*' => [
                 'required',
-                Rule::exists('users', 'id'),
+                'integer',
+                Rule::exists('user_company', 'user_id')
+                    ->where('company_id', $this->header('company')),
             ],
         ];
     }

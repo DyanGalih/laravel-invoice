@@ -42,12 +42,17 @@ class UserRequest extends FormRequest
             ],
             'companies' => [
                 'required',
+                'array',
             ],
             'companies.*.id' => [
                 'required',
+                'integer',
+                Rule::exists('companies', 'id')->where('id', $this->header('company')),
             ],
             'companies.*.role' => [
                 'required',
+                'string',
+                Rule::exists('roles', 'name')->where('scope', $this->header('company')),
             ],
         ];
 
@@ -69,6 +74,17 @@ class UserRequest extends FormRequest
     public function getUserPayload()
     {
         return collect($this->validated())
+            ->only([
+                'name',
+                'email',
+                'phone',
+                'password',
+                'contact_name',
+                'company_name',
+                'website',
+                'enable_portal',
+                'currency_id',
+            ])
             ->merge([
                 'creator_id' => $this->user()->id,
             ])

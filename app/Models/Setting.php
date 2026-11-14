@@ -11,6 +11,19 @@ class Setting extends Model
 
     protected $fillable = ['option', 'value'];
 
+    public static function publicKeys()
+    {
+        return [
+            'admin_portal_theme',
+            'admin_portal_logo',
+            'login_page_logo',
+            'login_page_heading',
+            'login_page_description',
+            'admin_page_title',
+            'copyright_text',
+        ];
+    }
+
     public static function setSetting($key, $setting)
     {
         $old = self::whereOption($key)->first();

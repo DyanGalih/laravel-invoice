@@ -8,6 +8,7 @@ use Crater\Http\Resources\CompanyResource;
 use Crater\Models\Company;
 use Crater\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -61,15 +62,19 @@ class CompaniesController extends Controller
         $company = Company::find($request->header('company'));
         $this->authorize('transfer company ownership', $company);
 
-        if ($user->hasCompany($company->id)) {
+        if (! $user->hasCompany($company->id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'User does not belongs to this company.'
             ]);
         }
 
-        $company->update(['owner_id' => $user->id]);
-        BouncerFacade::sync($user)->roles(['super admin']);
+        DB::transaction(function () use ($company, $user) {
+            $company->update(['owner_id' => $user->id]);
+            $user->companies()->syncWithoutDetaching([$company->id]);
+            BouncerFacade::scope()->to($company->id);
+            BouncerFacade::sync($user)->roles(['super admin']);
+        });
 
         return response()->json([
             'success' => true

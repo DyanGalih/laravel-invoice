@@ -62,8 +62,9 @@ class CustomersController extends Controller
      * @param  Customer $customer
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Customer $customer)
+    public function show(Request $request, Customer $customer)
     {
+        $customer = Customer::where('company_id', $request->header('company'))->findOrFail($customer->id);
         $this->authorize('view', $customer);
 
         return new CustomerResource($customer);
@@ -78,6 +79,7 @@ class CustomersController extends Controller
      */
     public function update(Requests\CustomerRequest $request, Customer $customer)
     {
+        $customer = Customer::where('company_id', $request->header('company'))->findOrFail($customer->id);
         $this->authorize('update', $customer);
 
         $customer = Customer::updateCustomer($request, $customer);
@@ -99,7 +101,7 @@ class CustomersController extends Controller
     {
         $this->authorize('delete multiple customers');
 
-        Customer::deleteCustomers($request->ids);
+        Customer::deleteCustomers($request->ids, $request->header('company'));
 
         return response()->json([
             'success' => true,

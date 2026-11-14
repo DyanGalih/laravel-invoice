@@ -26,12 +26,14 @@ class GetExchangeRateController extends Controller
         $settings = CompanySetting::getSettings(['currency'], $request->header('company'));
         $baseCurrency = Currency::findOrFail($settings['currency']);
 
-        $query = ExchangeRateProvider::whereJsonContains('currencies', $currency->code)
+        $query = ExchangeRateProvider::whereCompany()
+                ->whereJsonContains('currencies', $currency->code)
                 ->where('active', true)
                 ->get()
                 ->toArray();
 
-        $exchange_rate = ExchangeRateLog::where('base_currency_id', $currency->id)
+        $exchange_rate = ExchangeRateLog::where('company_id', $request->header('company'))
+                ->where('base_currency_id', $currency->id)
                 ->where('currency_id', $baseCurrency->id)
                 ->orderBy('created_at', 'desc')
                 ->value('exchange_rate');

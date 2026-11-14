@@ -4,6 +4,7 @@ use Crater\Http\Controllers\V1\Admin\Users\UsersController;
 use Crater\Http\Requests\UserRequest;
 use Crater\Models\User;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Faker\faker;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
@@ -54,6 +55,7 @@ test('store user using a form request', function () {
 
 test('get user', function () {
     $user = User::factory()->create();
+    $user->companies()->attach(User::find(1)->companies()->first()->id);
 
     getJson("/api/v1/users/{$user->id}")->assertOk();
 });

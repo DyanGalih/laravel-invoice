@@ -30,37 +30,81 @@ class InvoicesRequest extends FormRequest
         $rules = [
             'invoice_date' => [
                 'required',
+                'date',
             ],
             'due_date' => [
                 'nullable',
+                'date',
             ],
             'customer_id' => [
                 'required',
+                'integer',
+                Rule::exists('customers', 'id')->where('company_id', $this->header('company')),
             ],
             'invoice_number' => [
                 'required',
                 Rule::unique('invoices')->where('company_id', $this->header('company'))
             ],
             'exchange_rate' => [
-                'nullable'
+                'nullable',
+                'numeric',
+                'gt:0',
             ],
             'discount' => [
                 'required',
+                'numeric',
+                'min:0',
             ],
             'discount_val' => [
-                'required',
+                'sometimes',
+                'numeric',
+                'min:0',
             ],
             'sub_total' => [
-                'required',
+                'sometimes',
+                'integer',
+                'min:0',
             ],
             'total' => [
-                'required',
+                'sometimes',
+                'integer',
+                'min:0',
             ],
             'tax' => [
-                'required',
+                'sometimes',
+                'integer',
+                'min:0',
             ],
             'template_name' => [
-                'required'
+                'required',
+                'string',
+                'max:100',
+            ],
+            'currency_id' => [
+                'required',
+                'integer',
+                Rule::exists('currencies', 'id'),
+            ],
+            'reference_number' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'notes' => [
+                'nullable',
+                'string',
+            ],
+            'discount_type' => [
+                'nullable',
+                Rule::in(['fixed', 'percentage']),
+            ],
+            'sales_tax_type' => [
+                'nullable',
+                'string',
+            ],
+            'sales_tax_address_type' => [
+                'nullable',
+                'string',
             ],
             'items' => [
                 'required',
@@ -68,30 +112,72 @@ class InvoicesRequest extends FormRequest
             ],
             'items.*' => [
                 'required',
-                'max:255',
+                'array',
             ],
             'items.*.description' => [
                 'nullable',
             ],
             'items.*.name' => [
                 'required',
+                'string',
             ],
             'items.*.quantity' => [
                 'required',
+                'numeric',
+                'gt:0',
             ],
             'items.*.price' => [
                 'required',
+                'numeric',
+                'min:0',
+            ],
+            'items.*.discount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+            'items.*.discount_type' => [
+                'nullable',
+                Rule::in(['fixed', 'percentage']),
+            ],
+            'items.*.item_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('items', 'id')->where('company_id', $this->header('company')),
+            ],
+            'taxes' => [
+                'nullable',
+                'array',
+            ],
+            'taxes.*' => [
+                'array',
+            ],
+            'taxes.*.tax_type_id' => [
+                'required_with:taxes.*',
+                'integer',
+                Rule::exists('tax_types', 'id')->where('company_id', $this->header('company')),
+            ],
+            'items.*.taxes' => [
+                'nullable',
+                'array',
+            ],
+            'items.*.taxes.*.tax_type_id' => [
+                'required_with:items.*.taxes.*',
+                'integer',
+                Rule::exists('tax_types', 'id')->where('company_id', $this->header('company')),
             ],
         ];
 
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));
 
-        $customer = Customer::find($this->customer_id);
+        $customer = Customer::where('company_id', $this->header('company'))->find($this->customer_id);
 
         if ($customer && $companyCurrency) {
             if ((string)$customer->currency_id !== $companyCurrency) {
                 $rules['exchange_rate'] = [
                     'required',
+                    'numeric',
+                    'gt:0',
                 ];
             };
         }
@@ -110,27 +196,45 @@ class InvoicesRequest extends FormRequest
 
     public function getInvoicePayload()
     {
-        $company_currency = CompanySetting::getSetting('currency', $this->header('company'));
-        $current_currency = $this->currency_id;
-        $exchange_rate = $company_currency != $current_currency ? $this->exchange_rate : 1;
-        $currency = Customer::find($this->customer_id)->currency_id;
+        $input = $this->validator ? $this->validated() : $this->all();
 
-        return collect($this->except('items', 'taxes'))
+        $companyId = $this->header('company') ?: ($input['company_id'] ?? null);
+        $customerId = $input['customer_id'] ?? $this->customer_id;
+        $company_currency = CompanySetting::getSetting('currency', $companyId);
+        $current_currency = $input['currency_id'] ?? $this->currency_id;
+        $exchange_rate = $company_currency != $current_currency ? $this->exchange_rate : 1;
+        $customer = Customer::where('company_id', $companyId)->findOrFail($customerId);
+
+        return collect($input)
+            ->only([
+                'invoice_date',
+                'due_date',
+                'invoice_number',
+                'customer_id',
+                'reference_number',
+                'notes',
+                'discount_type',
+                'discount',
+                'template_name',
+                'currency_id',
+                'sales_tax_type',
+                'sales_tax_address_type',
+            ])
             ->merge([
                 'creator_id' => $this->user()->id ?? null,
                 'status' => $this->has('invoiceSend') ? Invoice::STATUS_SENT : Invoice::STATUS_DRAFT,
                 'paid_status' => Invoice::STATUS_UNPAID,
-                'company_id' => $this->header('company'),
-                'tax_per_item' => CompanySetting::getSetting('tax_per_item', $this->header('company')) ?? 'NO ',
-                'discount_per_item' => CompanySetting::getSetting('discount_per_item', $this->header('company')) ?? 'NO',
-                'due_amount' => $this->total,
+                'company_id' => $companyId,
+                'tax_per_item' => CompanySetting::getSetting('tax_per_item', $companyId) ?? 'NO ',
+                'discount_per_item' => CompanySetting::getSetting('discount_per_item', $companyId) ?? 'NO',
                 'exchange_rate' => $exchange_rate,
-                'base_total' => $this->total * $exchange_rate,
-                'base_discount_val' => $this->discount_val * $exchange_rate,
-                'base_sub_total' => $this->sub_total * $exchange_rate,
-                'base_tax' => $this->tax * $exchange_rate,
-                'base_due_amount' => $this->total * $exchange_rate,
-                'currency_id' => $currency,
+                'due_amount' => 0,
+                'base_total' => 0,
+                'base_discount_val' => 0,
+                'base_sub_total' => 0,
+                'base_tax' => 0,
+                'base_due_amount' => 0,
+                'currency_id' => $customer->currency_id,
             ])
             ->toArray();
     }

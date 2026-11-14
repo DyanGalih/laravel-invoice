@@ -72,7 +72,7 @@ class PaymentsController extends Controller
     {
         $this->authorize('delete multiple payments');
 
-        Payment::deletePayments($request->ids);
+        Payment::deletePayments($request->ids, $request->header('company'));
 
         return response()->json([
             'success' => true,

@@ -3,10 +3,11 @@
 namespace Crater\Models;
 
 use App;
-use Barryvdh\DomPDF\Facade as PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
 use Crater\Mail\SendEstimateMail;
 use Crater\Services\SerialNumberFormatter;
+use Crater\Traits\CalculatesDocumentTotals;
 use Crater\Traits\GeneratesPdfTrait;
 use Crater\Traits\HasCustomFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,6 +22,7 @@ class Estimate extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+    use CalculatesDocumentTotals;
     use GeneratesPdfTrait;
     use HasCustomFieldsTrait;
 
@@ -30,6 +32,31 @@ class Estimate extends Model implements HasMedia
     public const STATUS_EXPIRED = 'EXPIRED';
     public const STATUS_ACCEPTED = 'ACCEPTED';
     public const STATUS_REJECTED = 'REJECTED';
+
+    public function transitionStatus($status, $customer = false)
+    {
+        $status = strtoupper((string) $status);
+        $allowed = $customer
+            ? [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_VIEWED]
+            : [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_VIEWED];
+
+        if (! in_array($this->status, $allowed, true)) {
+            return false;
+        }
+
+        if ($customer && ! in_array($status, [self::STATUS_ACCEPTED, self::STATUS_REJECTED], true)) {
+            return false;
+        }
+
+        if (! $customer && ! in_array($status, [self::STATUS_SENT, self::STATUS_ACCEPTED, self::STATUS_REJECTED], true)) {
+            return false;
+        }
+
+        $this->status = $status;
+        $this->save();
+
+        return true;
+    }
 
     protected $dates = [
         'created_at',
@@ -98,14 +125,14 @@ class Estimate extends Model implements HasMedia
 
     public function getFormattedExpiryDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y/m/d';
 
         return Carbon::parse($this->expiry_date)->format($dateFormat);
     }
 
     public function getFormattedEstimateDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?: 'Y/m/d';
 
         return Carbon::parse($this->estimate_date)->format($dateFormat);
     }
@@ -130,7 +157,9 @@ class Estimate extends Model implements HasMedia
 
     public function scopeWhereEstimate($query, $estimate_id)
     {
-        $query->orWhere('id', $estimate_id);
+        $query->where(function ($query) use ($estimate_id) {
+            $query->where('estimates.id', $estimate_id);
+        });
     }
 
     public function scopeWhereSearch($query, $search)
@@ -208,6 +237,20 @@ class Estimate extends Model implements HasMedia
     public static function createEstimate($request)
     {
         $data = $request->getEstimatePayload();
+        $prepared = self::prepareDocument(
+            $request->header('company') ?: $data['company_id'],
+            $request->items,
+            $request->taxes,
+            $request->discount,
+            $request->discount_type,
+            $data['tax_per_item'],
+            $request->discount_val
+        );
+        $data = array_merge($data, $prepared['attributes']);
+        $data['base_discount_val'] = $data['discount_val'] * $data['exchange_rate'];
+        $data['base_sub_total'] = $data['sub_total'] * $data['exchange_rate'];
+        $data['base_total'] = $data['total'] * $data['exchange_rate'];
+        $data['base_tax'] = $data['tax'] * $data['exchange_rate'];
 
         if ($request->has('estimateSend')) {
             $data['status'] = self::STATUS_SENT;
@@ -231,10 +274,10 @@ class Estimate extends Model implements HasMedia
             ExchangeRateLog::addExchangeRateLog($estimate);
         }
 
-        self::createItems($estimate, $request, $estimate->exchange_rate);
+        self::createItems($estimate, $prepared['items'], $estimate->exchange_rate);
 
-        if ($request->has('taxes') && (! empty($request->taxes))) {
-            self::createTaxes($estimate, $request, $estimate->exchange_rate);
+        if (! empty($prepared['taxes'])) {
+            self::createTaxes($estimate, $prepared['taxes'], $estimate->exchange_rate);
         }
 
         $customFields = $request->customFields;
@@ -249,6 +292,20 @@ class Estimate extends Model implements HasMedia
     public function updateEstimate($request)
     {
         $data = $request->getEstimatePayload();
+        $prepared = self::prepareDocument(
+            $this->company_id,
+            $request->items,
+            $request->taxes,
+            $request->discount,
+            $request->discount_type,
+            $data['tax_per_item'],
+            $request->discount_val
+        );
+        $data = array_merge($data, $prepared['attributes']);
+        $data['base_discount_val'] = $data['discount_val'] * $data['exchange_rate'];
+        $data['base_sub_total'] = $data['sub_total'] * $data['exchange_rate'];
+        $data['base_total'] = $data['total'] * $data['exchange_rate'];
+        $data['base_tax'] = $data['tax'] * $data['exchange_rate'];
 
         $serial = (new SerialNumberFormatter())
             ->setModel($this)
@@ -278,10 +335,10 @@ class Estimate extends Model implements HasMedia
         $this->items()->delete();
         $this->taxes()->delete();
 
-        self::createItems($this, $request, $this->exchange_rate);
+        self::createItems($this, $prepared['items'], $this->exchange_rate);
 
-        if ($request->has('taxes') && (! empty($request->taxes))) {
-            self::createTaxes($this, $request, $this->exchange_rate);
+        if (! empty($prepared['taxes'])) {
+            self::createTaxes($this, $prepared['taxes'], $this->exchange_rate);
         }
 
         if ($request->customFields) {
@@ -298,42 +355,52 @@ class Estimate extends Model implements HasMedia
             ->find($this->id);
     }
 
-    public static function createItems($estimate, $request, $exchange_rate)
+    public static function createItems($estimate, $estimateItems, $exchange_rate)
     {
-        $estimateItems = $request->items;
+        if ($estimateItems instanceof \Illuminate\Http\Request) {
+            $estimateItems = $estimateItems->input('items', []);
+        }
 
         foreach ($estimateItems as $estimateItem) {
-            $estimateItem['company_id'] = $request->header('company');
+            $customFields = $estimateItem['custom_fields'] ?? [];
+            $taxes = $estimateItem['taxes'] ?? [];
+            unset($estimateItem['custom_fields'], $estimateItem['taxes']);
+            $estimateItem['company_id'] = $estimate->company_id;
             $estimateItem['exchange_rate'] = $exchange_rate;
             $estimateItem['base_price'] = $estimateItem['price'] * $exchange_rate;
             $estimateItem['base_discount_val'] = $estimateItem['discount_val'] * $exchange_rate;
-            $estimateItem['base_tax'] = $estimate['tax'] * $exchange_rate;
+            $estimateItem['base_tax'] = $estimateItem['tax'] * $exchange_rate;
             $estimateItem['base_total'] = $estimateItem['total'] * $exchange_rate;
 
             $item = $estimate->items()->create($estimateItem);
 
-            if (array_key_exists('taxes', $estimateItem) && $estimateItem['taxes']) {
-                foreach ($estimateItem['taxes'] as $tax) {
+            if ($taxes) {
+                foreach ($taxes as $tax) {
                     if (gettype($tax['amount']) !== "NULL") {
-                        $tax['company_id'] = $request->header('company');
+                        $tax['company_id'] = $estimate->company_id;
+                        $tax['exchange_rate'] = $exchange_rate;
+                        $tax['base_amount'] = $tax['amount'] * $exchange_rate;
+                        $tax['currency_id'] = $estimate->currency_id;
                         $item->taxes()->create($tax);
                     }
                 }
             }
 
-            if (array_key_exists('custom_fields', $estimateItem) && $estimateItem['custom_fields']) {
-                $item->addCustomFields($estimateItem['custom_fields']);
+            if ($customFields) {
+                $item->addCustomFields($customFields);
             }
         }
     }
 
-    public static function createTaxes($estimate, $request, $exchange_rate)
+    public static function createTaxes($estimate, $estimateTaxes, $exchange_rate)
     {
-        $estimateTaxes = $request->taxes;
+        if ($estimateTaxes instanceof \Illuminate\Http\Request) {
+            $estimateTaxes = $estimateTaxes->input('taxes', []);
+        }
 
         foreach ($estimateTaxes as $tax) {
             if (gettype($tax['amount']) !== "NULL") {
-                $tax['company_id'] = $request->header('company');
+                $tax['company_id'] = $estimate->company_id;
                 $tax['exchange_rate'] = $exchange_rate;
                 $tax['base_amount'] = $tax['amount'] * $exchange_rate;
                 $tax['currency_id'] = $estimate->currency_id;
@@ -495,7 +562,7 @@ class Estimate extends Model implements HasMedia
         foreach ($templates as $key => $template) {
             $templateName = Str::before(basename($template), '.blade.php');
             $estimateTemplates[$key]['name'] = $templateName;
-            $estimateTemplates[$key]['path'] = vite_asset('/img/PDF/'.$templateName.'.png');
+            $estimateTemplates[$key]['path'] = asset('build/img/PDF/'.$templateName.'.png');
         }
 
         return $estimateTemplates;

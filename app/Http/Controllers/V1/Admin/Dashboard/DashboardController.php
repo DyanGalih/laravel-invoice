@@ -41,15 +41,16 @@ class DashboardController extends Controller
         $start = Carbon::now();
         $end = Carbon::now();
         $terms = explode('-', $fiscalYear);
+        $fiscalMonth = (int) $terms[0];
 
-        if ($terms[0] <= $start->month) {
-            $startDate->month($terms[0])->startOfMonth();
-            $start->month($terms[0])->startOfMonth();
-            $end->month($terms[0])->endOfMonth();
+        if ($fiscalMonth <= $start->month) {
+            $startDate->month($fiscalMonth)->startOfMonth();
+            $start->month($fiscalMonth)->startOfMonth();
+            $end->month($fiscalMonth)->endOfMonth();
         } else {
-            $startDate->subYear()->month($terms[0])->startOfMonth();
-            $start->subYear()->month($terms[0])->startOfMonth();
-            $end->subYear()->month($terms[0])->endOfMonth();
+            $startDate->subYear()->month($fiscalMonth)->startOfMonth();
+            $start->subYear()->month($fiscalMonth)->startOfMonth();
+            $end->subYear()->month($fiscalMonth)->endOfMonth();
         }
 
         if ($request->has('previous_year')) {

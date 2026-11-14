@@ -59,19 +59,13 @@ test('create estimate', function () {
         'description' => $item['description'],
         'price' => $item['price'],
         'quantity' => $item['quantity'],
-        'total' => $item['total'],
     ]);
 
     $this->assertDatabaseHas('estimates', [
         'estimate_number' => $estimate['estimate_number'],
         'customer_id' => $estimate['customer_id'],
         'template_name' => $estimate['template_name'],
-        'sub_total' => $estimate['sub_total'],
-        'total' => $estimate['total'],
-        'discount' => $estimate['discount'],
         'discount_type' => $estimate['discount_type'],
-        'discount_val' => $estimate['discount_val'],
-        'tax' => $estimate['tax'],
         'notes' => $estimate['notes'],
     ]);
 });
@@ -106,7 +100,6 @@ test('update estimate', function () {
         'name' => $item['name'],
         'description' => $item['description'],
         'price' => $item['price'],
-        'total' => $item['total'],
         'quantity' => $item['quantity'],
     ]);
 
@@ -114,12 +107,7 @@ test('update estimate', function () {
         'estimate_number' => $newEstimate['estimate_number'],
         'customer_id' => $newEstimate['customer_id'],
         'template_name' => $newEstimate['template_name'],
-        'sub_total' => $newEstimate['sub_total'],
-        'total' => $newEstimate['total'],
-        'discount' => $newEstimate['discount'],
         'discount_type' => $newEstimate['discount_type'],
-        'discount_val' => $newEstimate['discount_val'],
-        'tax' => $newEstimate['tax'],
         'notes' => $newEstimate['notes'],
     ]);
 });

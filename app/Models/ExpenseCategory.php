@@ -48,7 +48,9 @@ class ExpenseCategory extends Model
 
     public function scopeWhereCategory($query, $category_id)
     {
-        $query->orWhere('id', $category_id);
+        $query->where(function ($query) use ($category_id) {
+            $query->where('expense_categories.id', $category_id);
+        });
     }
 
     public function scopeWhereSearch($query, $search)

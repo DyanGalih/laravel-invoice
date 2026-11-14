@@ -27,10 +27,14 @@ class DeleteExpensesRequest extends FormRequest
         return [
             'ids' => [
                 'required',
+                'array',
+                'min:1',
             ],
             'ids.*' => [
                 'required',
-                Rule::exists('expenses', 'id'),
+                'integer',
+                Rule::exists('expenses', 'id')
+                    ->where('company_id', $this->header('company')),
             ],
         ];
     }

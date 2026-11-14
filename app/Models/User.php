@@ -338,30 +338,30 @@ class User extends Authenticatable implements HasMedia
             'language' => CompanySetting::getSetting('language', $request->header('company')),
         ]);
 
-        $companies = collect($request->companies);
-        $user->companies()->sync($companies->pluck('id'));
+        $companyId = $request->header('company');
+        $company = collect($request->companies)->firstWhere('id', (int) $companyId);
+        $user->companies()->sync([$companyId]);
 
-        foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
-
-            BouncerFacade::sync($user)->roles([$company['role']]);
-        }
+        BouncerFacade::scope()->to($companyId);
+        BouncerFacade::sync($user)->roles([$company['role']]);
 
         return $user;
     }
 
     public function updateFromRequest(UserRequest $request)
     {
+        $passwordChanged = $request->filled('password');
         $this->update($request->getUserPayload());
-
-        $companies = collect($request->companies);
-        $this->companies()->sync($companies->pluck('id'));
-
-        foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
-
-            BouncerFacade::sync($this)->roles([$company['role']]);
+        if ($passwordChanged) {
+            $this->tokens()->delete();
         }
+
+        $companyId = $request->header('company');
+        $company = collect($request->companies)->firstWhere('id', (int) $companyId);
+        $this->companies()->syncWithoutDetaching([$companyId]);
+
+        BouncerFacade::scope()->to($companyId);
+        BouncerFacade::sync($this)->roles([$company['role']]);
 
         return $this;
     }
@@ -387,10 +387,24 @@ class User extends Authenticatable implements HasMedia
         return false;
     }
 
-    public static function deleteUsers($ids)
+    public static function deleteUsers($ids, $companyId = null)
     {
+        $companyId = $companyId ?: request()->header('company');
+
         foreach ($ids as $id) {
-            $user = self::find($id);
+            $user = self::whereHas('companies', function ($query) use ($companyId) {
+                $query->where('companies.id', $companyId);
+            })->find($id);
+
+            if (! $user) {
+                continue;
+            }
+
+            if ($user->companies()->count() > 1) {
+                $user->companies()->detach($companyId);
+
+                continue;
+            }
 
             if ($user->invoices()->exists()) {
                 $user->invoices()->update(['creator_id' => null]);

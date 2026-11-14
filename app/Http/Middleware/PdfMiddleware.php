@@ -17,7 +17,7 @@ class PdfMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::guard('web')->check() || Auth::guard('sanctum')->check() || Auth::guard('customer')->check()) {
+        if (Auth::guard('web')->check() || Auth::guard('sanctum')->check()) {
             return $next($request);
         }
 

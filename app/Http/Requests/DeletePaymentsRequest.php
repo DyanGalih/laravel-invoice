@@ -27,10 +27,14 @@ class DeletePaymentsRequest extends FormRequest
         return [
             'ids' => [
                 'required',
+                'array',
+                'min:1',
             ],
             'ids.*' => [
                 'required',
-                Rule::exists('payments', 'id'),
+                'integer',
+                Rule::exists('payments', 'id')
+                    ->where('company_id', $this->header('company')),
             ],
         ];
     }

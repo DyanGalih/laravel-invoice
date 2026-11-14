@@ -19,15 +19,37 @@ class EmailLog extends Model
 
     public function isExpired()
     {
-        $linkexpiryDays = CompanySetting::getSetting('link_expiry_days', $this->mailable()->get()->toArray()[0]['company_id']);
-        $checkExpiryLinks = CompanySetting::getSetting('automatically_expire_public_links', $this->mailable()->get()->toArray()[0]['company_id']);
+        $mailable = $this->mailable;
+        if (! $mailable || $this->revoked_at) {
+            return true;
+        }
 
-        $expiryDate = $this->created_at->addDays($linkexpiryDays);
+        $linkexpiryDays = CompanySetting::getSetting('link_expiry_days', $mailable->company_id);
+        $checkExpiryLinks = CompanySetting::getSetting('automatically_expire_public_links', $mailable->company_id);
 
-        if ($checkExpiryLinks == 'YES' && Carbon::now()->format('Y-m-d') > $expiryDate->format('Y-m-d')) {
+        $expiryDate = $this->created_at->copy()->addDays((int) ($linkexpiryDays ?: 7));
+
+        if (strtoupper((string) $checkExpiryLinks) === 'YES' && Carbon::now()->greaterThan($expiryDate)) {
             return true;
         }
 
         return false;
+    }
+
+    public function validMailable($type)
+    {
+        if ($this->mailable_type !== $type || $this->isExpired()) {
+            return null;
+        }
+
+        $mailable = $this->mailable;
+
+        return $mailable && $mailable->company_id ? $mailable : null;
+    }
+
+    public function revoke()
+    {
+        $this->revoked_at = Carbon::now();
+        $this->save();
     }
 }

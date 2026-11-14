@@ -53,16 +53,16 @@ class MailConfigurationController extends Controller
             'mail_driver' => config('mail.driver'),
             'mail_host' => config('mail.host'),
             'mail_port' => config('mail.port'),
-            'mail_username' => config('mail.username'),
-            'mail_password' => config('mail.password'),
+            'mail_username' => null,
+            'mail_password' => null,
             'mail_encryption' => config('mail.encryption'),
             'from_name' => config('mail.from.name'),
             'from_mail' => config('mail.from.address'),
             'mail_mailgun_endpoint' => config('services.mailgun.endpoint'),
             'mail_mailgun_domain' => config('services.mailgun.domain'),
-            'mail_mailgun_secret' => config('services.mailgun.secret'),
-            'mail_ses_key' => config('services.ses.key'),
-            'mail_ses_secret' => config('services.ses.secret'),
+            'mail_mailgun_secret' => null,
+            'mail_ses_key' => null,
+            'mail_ses_secret' => null,
         ];
 
 

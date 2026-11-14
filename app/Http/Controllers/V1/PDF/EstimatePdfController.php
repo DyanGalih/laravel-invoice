@@ -16,6 +16,10 @@ class EstimatePdfController extends Controller
      */
     public function __invoke(Request $request, Estimate $estimate)
     {
+        if (! $request->user() || ! $request->user()->hasCompany($estimate->company_id)) {
+            abort(404);
+        }
+
         if ($request->has('preview')) {
             return $estimate->getPDFData();
         }

@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Crater\Models\Company;
 use Crater\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class CompanyFactory extends Factory
 {
@@ -23,7 +24,7 @@ class CompanyFactory extends Factory
     public function definition()
     {
         return [
-            'unique_hash' => str_random(20),
+            'unique_hash' => Str::random(20),
             'name' => $this->faker->name(),
             'owner_id' => User::where('role', 'super admin')->first()->id,
             'slug' => $this->faker->word

@@ -75,18 +75,12 @@ test('create invoice', function () {
         'invoice_id' => $response->id,
         'name' => $item['name'],
         'description' => $item['description'],
-        'total' => $item['total'],
         'quantity' => $item['quantity'],
-        'discount' => $item['discount'],
         'price' => $item['price'],
     ]);
 
     $this->assertDatabaseHas('invoices', [
         'invoice_number' => $invoice['invoice_number'],
-        'sub_total' => $invoice['sub_total'],
-        'total' => $invoice['total'],
-        'tax' => $invoice['tax'],
-        'discount' => $invoice['discount'],
         'notes' => $invoice['notes'],
         'customer_id' => $invoice['customer_id'],
         'template_name' => $invoice['template_name'],
@@ -126,18 +120,12 @@ test('update invoice', function () {
         'invoice_id' => $response->id,
         'name' => $item['name'],
         'description' => $item['description'],
-        'total' => $item['total'],
         'quantity' => $item['quantity'],
-        'discount' => $item['discount'],
         'price' => $item['price'],
     ]);
 
     $this->assertDatabaseHas('invoices', [
         'invoice_number' => $newInvoice['invoice_number'],
-        'sub_total' => $newInvoice['sub_total'],
-        'total' => $newInvoice['total'],
-        'tax' => $newInvoice['tax'],
-        'discount' => $newInvoice['discount'],
         'notes' => $newInvoice['notes'],
         'customer_id' => $newInvoice['customer_id'],
         'template_name' => $newInvoice['template_name'],

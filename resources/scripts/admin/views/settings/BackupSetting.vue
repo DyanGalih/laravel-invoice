@@ -174,7 +174,7 @@ async function loadDisksData() {
 async function fetchBackupsData({ page, filter, sort }) {
   let data = {
     disk: filters.selected_disk.driver,
-    filed_disk_id: filters.selected_disk.id,
+           file_disk_id: filters.selected_disk.id,
   }
 
   isFetchingInitialData.value = true

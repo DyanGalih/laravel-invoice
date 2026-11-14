@@ -2,7 +2,9 @@
 
 namespace Crater\Http\Requests;
 
+use Crater\Models\Setting;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class GetSettingRequest extends FormRequest
 {
@@ -26,7 +28,8 @@ class GetSettingRequest extends FormRequest
         return [
             'key' => [
                 'required',
-                'string'
+                'string',
+                Rule::in(Setting::publicKeys()),
             ]
         ];
     }

@@ -32,12 +32,18 @@ class PaymentRequest extends FormRequest
             ],
             'customer_id' => [
                 'required',
+                'integer',
+                Rule::exists('customers', 'id')->where('company_id', $this->header('company')),
             ],
             'exchange_rate' => [
-                'nullable'
+                'nullable',
+                'numeric',
+                'gt:0',
             ],
             'amount' => [
                 'required',
+                'integer',
+                'min:0',
             ],
             'payment_number' => [
                 'required',
@@ -45,9 +51,13 @@ class PaymentRequest extends FormRequest
             ],
             'invoice_id' => [
                 'nullable',
+                'integer',
+                Rule::exists('invoices', 'id')->where('company_id', $this->header('company')),
             ],
             'payment_method_id' => [
                 'nullable',
+                'integer',
+                Rule::exists('payment_methods', 'id')->where('company_id', $this->header('company')),
             ],
             'notes' => [
                 'nullable',
@@ -65,12 +75,14 @@ class PaymentRequest extends FormRequest
 
         $companyCurrency = CompanySetting::getSetting('currency', $this->header('company'));
 
-        $customer = Customer::find($this->customer_id);
+        $customer = Customer::where('company_id', $this->header('company'))->find($this->customer_id);
 
         if ($customer && $companyCurrency) {
             if ((string)$customer->currency_id !== $companyCurrency) {
                 $rules['exchange_rate'] = [
                     'required',
+                    'numeric',
+                    'gt:0',
                 ];
             };
         }
@@ -83,9 +95,12 @@ class PaymentRequest extends FormRequest
         $company_currency = CompanySetting::getSetting('currency', $this->header('company'));
         $current_currency = $this->currency_id;
         $exchange_rate = $company_currency != $current_currency ? $this->exchange_rate : 1;
-        $currency = Customer::find($this->customer_id)->currency_id;
+        $currency = Customer::where('company_id', $this->header('company'))
+            ->findOrFail($this->customer_id)
+            ->currency_id;
 
         return collect($this->validated())
+            ->only(['payment_date', 'customer_id', 'amount', 'payment_number', 'invoice_id', 'payment_method_id', 'notes'])
             ->merge([
                 'creator_id' => $this->user()->id,
                 'company_id' => $this->header('company'),

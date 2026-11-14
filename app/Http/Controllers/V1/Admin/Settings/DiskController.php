@@ -20,7 +20,8 @@ class DiskController extends Controller
         $this->authorize('manage file disk');
 
         $limit = $request->has('limit') ? $request->limit : 5;
-        $disks = FileDisk::applyFilters($request->all())
+        $disks = FileDisk::whereCompany()
+            ->applyFilters($request->all())
             ->latest()
             ->paginateData($limit);
 
@@ -40,7 +41,8 @@ class DiskController extends Controller
             return respondJson('invalid_credentials', 'Invalid Credentials.');
         }
 
-        $disk = FileDisk::createDisk($request);
+        $companyId = $request->header('company') ?: $request->user()->companies()->firstOrFail()->id;
+        $disk = FileDisk::createDisk($request, $companyId);
 
         return new FileDiskResource($disk);
     }
@@ -53,6 +55,7 @@ class DiskController extends Controller
      */
     public function update(FileDisk $disk, Request $request)
     {
+        $disk = FileDisk::whereCompany()->findOrFail($disk->id);
         $this->authorize('manage file disk');
 
         $credentials = $request->credentials;
@@ -137,6 +140,7 @@ class DiskController extends Controller
      */
     public function destroy(FileDisk $disk)
     {
+        $disk = FileDisk::whereCompany()->findOrFail($disk->id);
         $this->authorize('manage file disk');
 
         if ($disk->setAsDefault() && $disk->type === 'SYSTEM') {

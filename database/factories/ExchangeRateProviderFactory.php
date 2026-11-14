@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Crater\Models\ExchangeRateProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class ExchangeRateProviderFactory extends Factory
 {
@@ -23,7 +24,7 @@ class ExchangeRateProviderFactory extends Factory
     {
         return [
             'driver' => $this->faker->word,
-            'key' => str_random(10),
+            'key' => Str::random(10),
             'active' => $this->faker->randomElement([true, false]),
         ];
     }

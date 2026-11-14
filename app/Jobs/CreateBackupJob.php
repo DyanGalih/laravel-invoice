@@ -36,7 +36,16 @@ class CreateBackupJob implements ShouldQueue
      */
     public function handle()
     {
-        $fileDisk = FileDisk::find($this->data['file_disk_id']);
+        if (empty($this->data['company_id']) || empty($this->data['file_disk_id'])) {
+            return;
+        }
+
+        $fileDisk = FileDisk::forCompany($this->data['company_id'])
+            ->find($this->data['file_disk_id']);
+
+        if (! $fileDisk) {
+            return;
+        }
         $fileDisk->setConfig();
 
         $prefix = env('DYNAMIC_DISK_PREFIX', 'temp_');
@@ -45,11 +54,11 @@ class CreateBackupJob implements ShouldQueue
 
         $backupJob = BackupJobFactory::createFromArray(config('backup'));
 
-        if ($this->data['option'] === 'only-db') {
+        if (($this->data['option'] ?? null) === 'only-db') {
             $backupJob->dontBackupFilesystem();
         }
 
-        if ($this->data['option'] === 'only-files') {
+        if (($this->data['option'] ?? null) === 'only-files') {
             $backupJob->dontBackupDatabases();
         }
 

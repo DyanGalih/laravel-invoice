@@ -18,6 +18,11 @@ class DownloadModuleController extends Controller
     {
         $this->authorize('manage modules');
 
+        $request->validate([
+            'module' => ['required', 'string', 'regex:/^[A-Za-z][A-Za-z0-9_-]{0,99}$/'],
+            'version' => ['required', 'string', 'regex:/^[A-Za-z0-9][A-Za-z0-9._-]{0,49}$/'],
+        ]);
+
         $response = ModuleInstaller::download($request->module, $request->version);
 
         return response()->json($response);

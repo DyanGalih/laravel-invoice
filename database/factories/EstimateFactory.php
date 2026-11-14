@@ -8,6 +8,7 @@ use Crater\Models\Estimate;
 use Crater\Models\User;
 use Crater\Services\SerialNumberFormatter;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class EstimateFactory extends Factory
 {
@@ -98,7 +99,7 @@ class EstimateFactory extends Factory
             'discount_per_item' => 'No',
             'tax' => $this->faker->randomDigitNotNull,
             'notes' => $this->faker->text(80),
-            'unique_hash' => str_random(60),
+            'unique_hash' => Str::random(60),
             'customer_id' => Customer::factory(),
             'exchange_rate' => $this->faker->randomDigitNotNull,
             'base_discount_val' => $this->faker->randomDigitNotNull,

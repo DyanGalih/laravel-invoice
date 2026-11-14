@@ -31,6 +31,9 @@
       <template #cell-driver="{ row }">
         <span class="capitalize">{{ row.data.driver.replace('_', ' ') }}</span>
       </template>
+      <template #cell-key_configured="{ row }">
+        {{ row.data.key_configured ? 'YES' : 'NO' }}
+      </template>
       <template #cell-active="{ row }">
         <BaseBadge
           :bg-color="
@@ -105,7 +108,7 @@ const drivers = computed(() => {
       tdClass: 'font-medium text-gray-900',
     },
     {
-      key: 'key',
+      key: 'key_configured',
       label: t('settings.exchange_rate.key'),
       thClass: 'extra',
       tdClass: 'font-medium text-gray-900',

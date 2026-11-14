@@ -29,10 +29,14 @@ class DeleteItemsRequest extends FormRequest
         return [
             'ids' => [
                 'required',
+                'array',
+                'min:1',
             ],
             'ids.*' => [
                 'required',
-                Rule::exists('items', 'id'),
+                'integer',
+                Rule::exists('items', 'id')
+                    ->where('company_id', $this->header('company')),
                 new RelationNotExist(Item::class, 'invoiceItems'),
                 new RelationNotExist(Item::class, 'estimateItems'),
                 new RelationNotExist(Item::class, 'taxes'),

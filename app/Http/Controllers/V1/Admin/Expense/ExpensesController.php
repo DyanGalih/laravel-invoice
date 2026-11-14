@@ -84,7 +84,9 @@ class ExpensesController extends Controller
     {
         $this->authorize('delete multiple expenses');
 
-        Expense::destroy($request->ids);
+        Expense::where('company_id', $request->header('company'))
+            ->whereIn('id', $request->ids)
+            ->delete();
 
         return response()->json([
             'success' => true,

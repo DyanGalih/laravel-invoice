@@ -37,6 +37,14 @@ class MailEnvironmentRequest extends FormRequest
                     'mail_port' => [
                         'required',
                     ],
+                    'mail_username' => [
+                        'nullable',
+                        'string',
+                    ],
+                    'mail_password' => [
+                        'nullable',
+                        'string',
+                    ],
                     'mail_encryption' => [
                         'required',
                         'string',
@@ -64,7 +72,7 @@ class MailEnvironmentRequest extends FormRequest
                         'string',
                     ],
                     'mail_mailgun_secret' => [
-                        'required',
+                        'nullable',
                         'string',
                     ],
                     'mail_mailgun_endpoint' => [
@@ -97,11 +105,11 @@ class MailEnvironmentRequest extends FormRequest
                         'required',
                     ],
                     'mail_ses_key' => [
-                        'required',
+                        'nullable',
                         'string',
                     ],
                     'mail_ses_secret' => [
-                        'required',
+                        'nullable',
                         'string',
                     ],
                     'mail_encryption' => [

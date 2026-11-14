@@ -129,10 +129,16 @@ class Customer extends Authenticatable implements HasMedia
         return 0;
     }
 
-    public static function deleteCustomers($ids)
+    public static function deleteCustomers($ids, $companyId = null)
     {
+        $companyId = $companyId ?: request()->header('company');
+
         foreach ($ids as $id) {
-            $customer = self::find($id);
+            $customer = self::where('company_id', $companyId)->find($id);
+
+            if (! $customer) {
+                continue;
+            }
 
             if ($customer->estimates()->exists()) {
                 $customer->estimates()->delete();
@@ -284,7 +290,9 @@ class Customer extends Authenticatable implements HasMedia
 
     public function scopeWhereCustomer($query, $customer_id)
     {
-        $query->orWhere('customers.id', $customer_id);
+        $query->where(function ($query) use ($customer_id) {
+            $query->where('customers.id', $customer_id);
+        });
     }
 
     public function scopeApplyInvoiceFilters($query, array $filters)

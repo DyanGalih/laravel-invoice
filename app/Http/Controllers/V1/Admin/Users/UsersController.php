@@ -25,14 +25,19 @@ class UsersController extends Controller
 
         $user = $request->user();
 
-        $users = User::applyFilters($request->all())
+        $users = User::whereHas('companies', function ($query) use ($request) {
+            $query->where('companies.id', $request->header('company'));
+        })
+            ->applyFilters($request->all())
             ->where('id', '<>', $user->id)
             ->latest()
             ->paginate($limit);
 
         return UserResource::collection($users)
             ->additional(['meta' => [
-                'user_total_count' => User::count(),
+                'user_total_count' => User::whereHas('companies', function ($query) use ($request) {
+                    $query->where('companies.id', $request->header('company'));
+                })->count(),
             ]]);
     }
 
@@ -91,7 +96,7 @@ class UsersController extends Controller
         $this->authorize('delete multiple users', User::class);
 
         if ($request->users) {
-            User::deleteUsers($request->users);
+            User::deleteUsers($request->users, $request->header('company'));
         }
 
         return response()->json([

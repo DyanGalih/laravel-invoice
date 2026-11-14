@@ -3,7 +3,6 @@
 namespace Crater\Space;
 
 use DateTime;
-use RuntimeException;
 
 class SecurityReleaseAssurance
 {
@@ -196,6 +195,7 @@ class SecurityReleaseAssurance
                     foreach ($npmAdvisories as $adv) {
                         if (self::isDispositionApproved($dispositions[$package], $adv)) {
                             $isExempt = true;
+
                             break;
                         }
                     }
@@ -261,6 +261,7 @@ class SecurityReleaseAssurance
                     foreach ($evidence['approved_exceptions'] as $idx => $exception) {
                         if (! is_array($exception) || empty($exception['advisory']) || empty($exception['owner']) || empty($exception['mitigation']) || empty($exception['expiry'])) {
                             $errors[] = "Approved exception #{$idx} must include advisory, owner, mitigation, and expiry.";
+
                             continue;
                         }
 
