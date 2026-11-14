@@ -18,6 +18,10 @@ trait SiteApi
             throw new RuntimeException('Remote package endpoint must use HTTPS.');
         }
 
+        if (preg_match('#^https?://#i', $url) && parse_url($url, PHP_URL_SCHEME) !== 'https') {
+            throw new RuntimeException('Remote package endpoint must use HTTPS.');
+        }
+
         $client = new Client([
             'verify' => true,
             'base_uri' => $baseUrl.'/',
@@ -77,24 +81,16 @@ trait SiteApi
         return $headerHash ?: env($environmentKey);
     }
 
-    protected static function extractVerifiedPackage($zipFilePath)
+    public static function safeExtractArchive($zipFilePath, $tempExtractDir)
     {
-        $zipFilePath = static::resolveStoragePath($zipFilePath);
-        $storagePath = realpath(storage_path('app'));
-        if (! $zipFilePath || ! $storagePath || ! static::isWithin($zipFilePath, $storagePath) || strpos(basename(dirname($zipFilePath)), 'temp-') !== 0) {
-            throw new RuntimeException('Package path is not an approved temporary file.');
+        if (! is_file($zipFilePath)) {
+            throw new RuntimeException('Package archive not found.');
         }
 
-        $marker = $zipFilePath.'.verified';
-        $verifiedHash = is_file($marker) ? trim((string) file_get_contents($marker)) : '';
-        $actualHash = hash_file('sha256', $zipFilePath);
-        if (! preg_match('/^[a-f0-9]{64}$/i', $verifiedHash) || ! hash_equals(strtolower($verifiedHash), strtolower($actualHash))) {
-            throw new RuntimeException('Package integrity verification is required.');
-        }
-
-        $tempExtractDir = storage_path('app/temp2-'.bin2hex(random_bytes(12)));
-        if (! mkdir($tempExtractDir, 0755, true) && ! is_dir($tempExtractDir)) {
-            throw new RuntimeException('Unable to create package extraction directory.');
+        if (! is_dir($tempExtractDir)) {
+            if (! mkdir($tempExtractDir, 0755, true) && ! is_dir($tempExtractDir)) {
+                throw new RuntimeException('Unable to create package extraction directory.');
+            }
         }
 
         $zip = new ZipArchive();
@@ -184,6 +180,28 @@ trait SiteApi
         }
 
         $zip->close();
+
+        return $tempExtractDir;
+    }
+
+    protected static function extractVerifiedPackage($zipFilePath)
+    {
+        $zipFilePath = static::resolveStoragePath($zipFilePath);
+        $storagePath = realpath(storage_path('app'));
+        if (! $zipFilePath || ! $storagePath || ! static::isWithin($zipFilePath, $storagePath) || strpos(basename(dirname($zipFilePath)), 'temp-') !== 0) {
+            throw new RuntimeException('Package path is not an approved temporary file.');
+        }
+
+        $marker = $zipFilePath.'.verified';
+        $verifiedHash = is_file($marker) ? trim((string) file_get_contents($marker)) : '';
+        $actualHash = hash_file('sha256', $zipFilePath);
+        if (! preg_match('/^[a-f0-9]{64}$/i', $verifiedHash) || ! hash_equals(strtolower($verifiedHash), strtolower($actualHash))) {
+            throw new RuntimeException('Package integrity verification is required.');
+        }
+
+        $tempExtractDir = storage_path('app/temp2-'.bin2hex(random_bytes(12)));
+        static::safeExtractArchive($zipFilePath, $tempExtractDir);
+
         \File::delete($zipFilePath);
         \File::delete($marker);
         if (file_put_contents($tempExtractDir.'/.verified', $actualHash, LOCK_EX) === false) {
