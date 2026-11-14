@@ -2,7 +2,7 @@
 
 namespace Crater\Models;
 
-use Barryvdh\DomPDF\Facade as PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Crater\Jobs\GeneratePaymentPdfJob;
 use Crater\Mail\SendPaymentMail;
@@ -63,14 +63,14 @@ class Payment extends Model implements HasMedia
 
     public function getFormattedCreatedAtAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?? 'Y-m-d';
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
     public function getFormattedPaymentDateAttribute($value)
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id) ?? 'Y-m-d';
 
         return Carbon::parse($this->payment_date)->format($dateFormat);
     }

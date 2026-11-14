@@ -3,7 +3,7 @@
 namespace Crater\Models;
 
 use App;
-use Barryvdh\DomPDF\Facade as PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Crater\Mail\SendEstimateMail;
 use Crater\Services\SerialNumberFormatter;
@@ -30,6 +30,29 @@ class Estimate extends Model implements HasMedia
     public const STATUS_EXPIRED = 'EXPIRED';
     public const STATUS_ACCEPTED = 'ACCEPTED';
     public const STATUS_REJECTED = 'REJECTED';
+
+    public static function allowedTransitions(): array
+    {
+        return [
+            self::STATUS_DRAFT => [self::STATUS_SENT, self::STATUS_VIEWED],
+            self::STATUS_SENT => [self::STATUS_VIEWED, self::STATUS_ACCEPTED, self::STATUS_REJECTED, self::STATUS_EXPIRED],
+            self::STATUS_VIEWED => [self::STATUS_ACCEPTED, self::STATUS_REJECTED, self::STATUS_EXPIRED],
+            self::STATUS_ACCEPTED => [],
+            self::STATUS_REJECTED => [self::STATUS_DRAFT],
+            self::STATUS_EXPIRED => [self::STATUS_DRAFT],
+        ];
+    }
+
+    public function canTransitionTo(string $newStatus): bool
+    {
+        if ($this->status === $newStatus) {
+            return true;
+        }
+
+        $transitions = self::allowedTransitions();
+
+        return in_array($newStatus, $transitions[$this->status] ?? [], true);
+    }
 
     protected $dates = [
         'created_at',
@@ -130,7 +153,7 @@ class Estimate extends Model implements HasMedia
 
     public function scopeWhereEstimate($query, $estimate_id)
     {
-        $query->orWhere('id', $estimate_id);
+        $query->where('estimates.id', $estimate_id);
     }
 
     public function scopeWhereSearch($query, $search)

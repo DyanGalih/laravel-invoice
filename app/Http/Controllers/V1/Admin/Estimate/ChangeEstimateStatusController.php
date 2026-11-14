@@ -19,7 +19,15 @@ class ChangeEstimateStatusController extends Controller
     {
         $this->authorize('send estimate', $estimate);
 
-        $estimate->update($request->only('status'));
+        $newStatus = (string) $request->input('status');
+        if (! $estimate->canTransitionTo($newStatus)) {
+            return response()->json([
+                'error' => 'invalid_status_transition',
+                'message' => "Cannot transition estimate from {$estimate->status} to {$newStatus}.",
+            ], 422);
+        }
+
+        $estimate->update(['status' => $newStatus]);
 
         return response()->json([
             'success' => true,
